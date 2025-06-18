@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import { connectDB } from "./config/db.js"
+// import authRouter from "./routes/authRoutes.js"
 
 import 'dotenv/config'
 
@@ -16,6 +17,19 @@ app.use(express.urlencoded({ extended: true }));
 
 //db Connection
 connectDB();
+
+//API Endpoints
+  // app.use('/api/auth', authRouter);
+  // app.use('/api/items', itemRouter);
+  // app.use('/api/users',userRouter);
+  // app.use('/api/circles',circleRouter);
+  // app.use('/api/offer', offerRouter);
+  // app.use('/api/requests',requestsRouter);
+  // app.use('/api/chat',chatRouter);
+  // app.use('/api/karma',karmaRouter);
+  // app.use('/api/events',eventRouter);
+  // app.use('/api/stats',statsRouter);
+  // app.use('/api/admin',adminRouter);
 
 // Basic route
 app.get('/', (req, res) => {
