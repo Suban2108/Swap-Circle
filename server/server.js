@@ -8,6 +8,7 @@ import 'dotenv/config'
 
 //app config
 const app = express();
+
 const PORT = process.env.PORT || 5005;
 
 //middleware

@@ -23,7 +23,8 @@ const registerByEmail = async (req, res) => {
     // Create new user
     const user = new User({
       password: hashedPassword,
-      name
+      name,
+      email
     });
 
     await user.save();
@@ -95,7 +96,5 @@ const logout = async (req, res) => {
     res.status(500).json({ message: 'Error logging out', error: error.message });
   }
 };
-
-export { loginByEmail, registerByEmail, logout }
 
 export {loginByEmail,registerByEmail}
