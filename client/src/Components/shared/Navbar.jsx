@@ -6,10 +6,11 @@ import Main_logo from '../../assets/Main-logo(1).png'
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(true) // Simulate logged-in state
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      setScrolled(window.scrollY > 50)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -25,21 +26,20 @@ const AwesomeNavbar = () => {
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
       scrolled 
-        ? 'bg-white/95 backdrop-blur-lg shadow-xl border-b border-gray-100' 
+        ? 'bg-transparent backdrop-blur-lg shadow-xl border-b border-gray-100' 
         : 'bg-white shadow-lg'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 py-4 ">
+      <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo with enhanced styling */}
+          {/* Logo */}
           <div className="relative group">
             <a 
               href='/home' 
               className="flex items-center space-x-3 transform hover:scale-105 transition-all duration-300"
             >
               <div className="relative">
-                {/* Placeholder for logo - replace with your actual logo */}
                 <div className="w-[50px] h-[50px] bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Link to='/home'><img src={Main_logo} className='w-[45px] h-[45px]' alt="" /></Link>
+                  <Link to='/home'><img src={Main_logo} className='w-[45px] h-[45px]' alt="Logo" /></Link>
                 </div>
                 <div className="absolute -inset-1 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
               </div>
@@ -67,15 +67,56 @@ const AwesomeNavbar = () => {
             ))}
           </div>
 
-          {/* CTA Button */}
+          {/* CTA / Profile */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="relative px-6 py-3 bg-gradient-to-r from-[#077FBA] to-orange-500 text-white font-semibold rounded-full overflow-hidden group transform hover:scale-105 transition-all duration-300">
-              <span className="relative z-10">Get Started</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-[#077FBA] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
-            </button>
+            {isLoggedIn ? (
+              <div className="relative group">
+                <img
+                  src="https://i.pravatar.cc/150?img=4"
+                  alt="Profile"
+                  className="w-13 h-13 rounded-full border-2 border-orange-400 shadow-sm cursor-pointer hover:scale-105 transition"
+                />
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-xl rounded-lg opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 scale-95 group-hover:scale-100 transition-all duration-300 z-50">
+                  <ul className="text-sm text-gray-700">
+                    <li>
+                      <Link
+                        to="/dashboard"
+                        className="block px-4 py-2 hover:bg-orange-50 hover:rounded-lg hover:text-[#F25201] transition"
+                      >
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 hover:bg-orange-50 hover:rounded-lg hover:text-[#F25201] transition"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => setIsLoggedIn(false)}
+                        className="w-full text-left px-4 py-2 hover:bg-orange-50 hover:rounded-lg text-red-500 transition"
+                      >
+                        Sign out
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span className='text-[#F25201] mr-[30px] hover:text-orange-900 cursor-pointer'>Sign in</span>
+                <button className="relative px-6 py-3 bg-gradient-to-r from-[#077FBA] to-orange-500 text-white font-semibold rounded-full overflow-hidden group transform hover:scale-105 transition-all duration-300">
+                  <span className="relative z-10">Sign up</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-[#077FBA] translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -83,9 +124,9 @@ const AwesomeNavbar = () => {
             >
               <div className="w-6 h-6">
                 {isOpen ? (
-                  <X className="w-6 h-6 transform rotate-0 transition-transform duration-300" />
+                  <X className="w-6 h-6" />
                 ) : (
-                  <Menu className="w-6 h-6 transform rotate-0 transition-transform duration-300" />
+                  <Menu className="w-6 h-6" />
                 )}
               </div>
             </button>
@@ -108,11 +149,24 @@ const AwesomeNavbar = () => {
                 {item.name}
               </a>
             ))}
-            <div className="pt-4 px-4">
-              <button className="w-full py-3 bg-gradient-to-r from-[#077FBA] to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
-                Get Started
-              </button>
-            </div>
+            {!isLoggedIn ? (
+              <div className="pt-4 px-4">
+                <button className="w-full py-3 bg-gradient-to-r from-[#077FBA] to-orange-500 text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                  Sign up
+                </button>
+              </div>
+            ) : (
+              <div className="pt-2 px-4 space-y-1">
+                <Link to="/dashboard" className="block text-sm text-[#F25201] hover:underline hover:rounded-lg">Dashboard</Link>
+                <Link to="/profile" className="block text-sm text-[#F25201] hover:underline hover:rounded-lg">Profile</Link>
+                <button
+                  onClick={() => setIsLoggedIn(false)}
+                  className="block w-full text-left text-sm text-red-500 hover:underline hover:rounded-lg"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

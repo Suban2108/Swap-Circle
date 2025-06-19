@@ -12,7 +12,7 @@ const HeroSection = () => {
     return (
         <div>
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+            <section className="relative h-[850px] flex items-center justify-center overflow-hidden">
                 {/* Beautiful Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-orange-200 to-indigo-400"></div>
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#077FBA]/5 via-transparent to-orange-500/10"></div>
@@ -26,17 +26,17 @@ const HeroSection = () => {
 
                 {/* Floating Elements */}
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-20 left-20 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>
-                        <div className="w-15 h-15 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full opacity-100"></div>
+                    <div className="absolute top-30 left-40 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>
+                        <div className="w-15 h-15 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full opacity-80"></div>
                     </div>
-                    <div className="absolute top-40 right-32 animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}>
-                        <div className="w-15 h-15 bg-gradient-to-br from-[#077FBA] to-blue-600 rounded-full opacity-100"></div>
+                    <div className="absolute top-40 right-22 animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}>
+                        <div className="w-15 h-15 bg-gradient-to-br from-[#077FBA] to-blue-600 rounded-full opacity-80"></div>
                     </div>
-                    <div className="absolute bottom-32 left-40 animate-bounce" style={{ animationDelay: '2s', animationDuration: '5s' }}>
-                        <div className="w-15 h-15 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full opacity-100"></div>
+                    <div className="absolute bottom-32 left-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '5s' }}>
+                        <div className="w-15 h-15 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full opacity-80"></div>
                     </div>
                     <div className="absolute bottom-20 right-20 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '3.5s' }}>
-                        <Sparkles className="w-15 h-15 text-orange-400 opacity-100" />
+                        <Sparkles className="w-15 h-15 text-orange-400 opacity-80" />
                     </div>
                 </div>
 
@@ -112,7 +112,7 @@ const HeroSection = () => {
 
                 {/* Bottom Wave */}
                 <div className="absolute bottom-0 left-0 right-0">
-                    <svg viewBox="0 0 1200 120" className="w-full h-20 fill-white">
+                    <svg viewBox="0 0 1200 120" className="w-[100%] h-20 fill-white">
                         <path d="M0,60 C300,120 600,0 900,60 C1050,90 1150,30 1200,60 L1200,120 L0,120 Z" />
                     </svg>
                 </div>

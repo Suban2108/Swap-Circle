@@ -28,7 +28,7 @@ const MarqueeColumn = ({ reverse = false, columnIndex }) => (
 const MarqueeSection = () => {
   return (
     <section className="w-full flex items-center justify-center my-16">
-      <div className="w-full max-w-7xl h-[500px] flex flex-col md:flex-row overflow-hidden bg-white">
+      <div className="w-full max-w-7xl h-[600px] flex flex-col md:flex-row overflow-hidden bg-white">
         
         {/* Left Content */}
         <div className="md:w-3/5 w-full p-10 flex flex-col justify-center space-y-6">
@@ -44,7 +44,7 @@ const MarqueeSection = () => {
         </div>
 
         {/* Right Content - 3 vertical marquee columns side-by-side */}
-        <div className="md:w-2/5 w-full bg-gradient-to-br from-orange-100 to-blue-100 border-l border-gray-100 rounded-[20px]">
+        <div className="md:w-2/5 w-full bg-gradient-to-br from-orange-100 via-indigo-100 to-blue-100 border-l border-gray-100 rounded-[20px]">
           <div className="marquee-columns">
             <MarqueeColumn columnIndex={1} />
             <MarqueeColumn reverse columnIndex={2} />
