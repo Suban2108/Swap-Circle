@@ -100,16 +100,16 @@ const HowItWorks = () => {
             return (
               <div
                 key={step.id}
-                className={`group p-6 rounded-xl border transition-all duration-300 cursor-pointer relative 
+                className={`group p-6 rounded-xl border border-zinc-400 transition-all duration-300 cursor-pointer relative 
                   ${isActive ? "ring-2 ring-primary bg-muted scale-105" : 
                   "bg-background border-muted hover:ring-1 hover:ring-muted-foreground/30"}`}
                 onMouseEnter={() => setActiveStep(index)}
               >
                 {/* Colored Icon Container */}
                 <div
-                  className={`w-12 h-12 rounded-md flex items-center justify-center mb-4 transition-all
+                  className={`w-12 h-12 rounded-md flex items-center border border-zinc-700 justify-center mb-4 transition-all
                     ${isActive
-                      ? `bg-${step.color}-500 text-white dark:bg-${step.color}-600 scale-105`
+                      ? `bg-${step.color}-500 dark:bg-${step.color}-600 scale-105`
                       : `bg-${step.color}-100 text-${step.color}-700 dark:bg-${step.color}-900 dark:text-${step.color}-200`
                     }`}
                 >

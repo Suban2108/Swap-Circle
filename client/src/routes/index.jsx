@@ -6,7 +6,7 @@ import AuthForms from '../Pages/Auth/loginRegister'
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/home" element={<HomePage />} />
+    <Route path="/" element={<HomePage />} />
     <Route path="/login" element={<AuthForms />} />
   </Routes>
 )

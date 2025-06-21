@@ -92,181 +92,147 @@ const Testimonials = () => {
     }
   }, [isAutoPlaying, testimonials.length])
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
-  }
+  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+  const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+  const goToSlide = (index) => setCurrentIndex(index)
 
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
-  }
-
-  const goToSlide = (index) => {
-    setCurrentIndex(index)
-  }
-
-  const currentTestimonial = testimonials[currentIndex]
+  const current = testimonials[currentIndex]
 
   return (
-    <section className="relative py-20 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-[#077FBA]/5 rounded-full blur-xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-32 h-32 bg-orange-500/5 rounded-full blur-xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-gradient-to-r from-[#077FBA]/10 to-orange-500/10 rounded-full blur-lg animate-pulse delay-2000" />
-      </div>
-
+    <section className="relative py-20 bg-background overflow-hidden">
       {/* Floating Icons */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <Heart className="absolute top-20 right-20 w-8 h-8 text-orange-300/30 animate-float" />
-        <Users className="absolute bottom-32 left-16 w-10 h-10 text-[#077FBA]/20 animate-float delay-1000" />
-        <Sparkles className="absolute top-40 left-20 w-6 h-6 text-orange-400/40 animate-float delay-2000" />
+      <div className="absolute inset-0 pointer-events-none">
+        <Heart className="absolute top-20 right-20 w-8 h-8 text-pink-300 dark:text-pink-800 animate-float" />
+        <Users className="absolute bottom-32 left-16 w-10 h-10 text-blue-300 dark:text-blue-800 animate-float delay-1000" />
+        <Sparkles className="absolute top-40 left-20 w-6 h-6 text-yellow-300 dark:text-yellow-700 animate-float delay-2000" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-[#077FBA]/10 to-orange-500/10 border border-[#077FBA]/20 text-[#077FBA] text-sm font-medium mb-6">
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full border text-sm font-medium text-muted-foreground border-muted bg-muted/20 mb-4">
             <Heart className="w-4 h-4 mr-2" />
             Community Love
           </div>
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-[#077FBA] via-orange-500 to-[#077FBA] bg-clip-text text-transparent">
-              What Our Community Says
-            </span>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">
+            What Our Community Says
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Real stories from real people who are making a difference through 
-            <span className="text-[#077FBA] font-semibold"> sustainable swapping</span>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Real stories from real people who are making a difference through{" "}
+            <span className="font-semibold text-primary">sustainable swapping</span>
           </p>
         </div>
 
-        {/* Carousel Container */}
-        <div 
-          className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100"
+        {/* Testimonial Card */}
+        <div
+          className="relative bg-muted rounded-3xl border border-border shadow-lg overflow-hidden"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
-          {/* Main Testimonial */}
           <div className="relative p-8 md:p-12">
-            {/* Quote Icon */}
             <div className="absolute top-8 right-8 opacity-10">
-              <Quote className="w-24 h-24 text-[#077FBA]" />
+              <Quote className="w-24 h-24 text-primary" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-              {/* User Info */}
+              {/* Left Column */}
               <div className="text-center lg:text-left">
                 <div className="relative inline-block mb-6">
                   <img
-                    src={currentTestimonial.image}
-                    alt={currentTestimonial.name}
-                    className="w-24 h-24 rounded-full object-cover mx-auto lg:mx-0 ring-4 ring-gradient-to-r from-[#077FBA] to-orange-500 shadow-xl"
+                    src={current.image}
+                    alt={current.name}
+                    className="w-24 h-24 rounded-full object-cover mx-auto lg:mx-0 ring-4 ring-primary shadow-xl"
                   />
-                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-[#077FBA] to-orange-500 rounded-full flex items-center justify-center">
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                     <Heart className="w-4 h-4 text-white" />
                   </div>
                 </div>
-                
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  {currentTestimonial.name}
-                </h3>
-                <p className="text-[#077FBA] font-semibold mb-1">
-                  {currentTestimonial.role}
-                </p>
-                <p className="text-gray-500 text-sm mb-4">
-                  {currentTestimonial.location}
-                </p>
-                
-                {/* Stats */}
-                <div className="flex justify-center lg:justify-start space-x-4 text-sm">
-                  <div className="bg-blue-50 px-3 py-1 rounded-full">
-                    <span className="text-[#077FBA] font-semibold">{currentTestimonial.swaps}</span>
-                    <span className="text-gray-600 ml-1">swaps</span>
+                <h3 className="text-2xl font-bold text-foreground mb-2">{current.name}</h3>
+                <p className="text-primary font-medium">{current.role}</p>
+                <p className="text-muted-foreground text-sm">{current.location}</p>
+
+                <div className="flex justify-center lg:justify-start gap-4 mt-4 text-sm">
+                  <div className="bg-primary/10 px-3 py-1 rounded-full text-primary font-medium">
+                    {current.swaps} swaps
                   </div>
-                  <div className="bg-orange-50 px-3 py-1 rounded-full">
-                    <span className="text-orange-500 font-semibold">{currentTestimonial.saved}</span>
-                    <span className="text-gray-600 ml-1">saved</span>
+                  <div className="bg-accent/20 px-3 py-1 rounded-full text-accent-foreground font-medium">
+                    {current.saved} saved
                   </div>
                 </div>
               </div>
 
-              {/* Testimonial Content */}
-              <div className="lg:col-span-2 relative">
+              {/* Right Column */}
+              <div className="lg:col-span-2">
                 <div className="flex mb-4">
-                  {[...Array(currentTestimonial.rating)].map((_, i) => (
+                  {Array.from({ length: current.rating }).map((_, i) => (
                     <Star key={i} className="w-6 h-6 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                
-                <blockquote className="text-xl md:text-2xl leading-relaxed text-gray-700 font-medium mb-6 relative">
-                  "{currentTestimonial.content}"
+                <blockquote className="text-xl md:text-2xl font-medium text-foreground leading-relaxed mb-6">
+                  “{current.content}”
                 </blockquote>
-                
                 <div className="flex items-center">
-                  <div className="h-px bg-gradient-to-r from-[#077FBA] to-orange-500 flex-1 mr-4" />
-                  <span className="text-sm text-gray-400 font-medium">Verified SwapCircle Member</span>
+                  <div className="h-px flex-1 mr-4 bg-gradient-to-r from-primary to-accent" />
+                  <span className="text-sm text-muted-foreground font-medium">
+                    Verified SwapCircle Member
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Navigation Arrows */}
+          {/* Arrows */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-[#077FBA] hover:bg-white transition-all duration-300 group"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-background/80 border border-border rounded-full flex items-center justify-center shadow-md text-muted-foreground hover:text-primary transition"
           >
-            <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-[#077FBA] hover:bg-white transition-all duration-300 group"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-background/80 border border-border rounded-full flex items-center justify-center shadow-md text-muted-foreground hover:text-primary transition"
           >
-            <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Dots Navigation */}
-        <div className="flex justify-center mt-8 space-x-3">
+        {/* Dots */}
+        <div className="flex justify-center mt-6 space-x-2">
           {testimonials.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`transition-all duration-300 rounded-full ${
                 index === currentIndex
-                  ? 'w-12 h-3 bg-gradient-to-r from-[#077FBA] to-orange-500'
-                  : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                  ? 'w-10 h-2 bg-gradient-to-r from-primary to-accent'
+                  : 'w-2 h-2 bg-muted-foreground/30'
               }`}
             />
           ))}
         </div>
 
-        {/* Call to Action */}
+        {/* CTA */}
         <div className="text-center mt-16">
-          <p className="text-lg text-gray-600 mb-6">
-            Ready to join our amazing community?
-          </p>
-          <button className="group relative px-8 py-4 bg-gradient-to-r from-[#077FBA] to-orange-500 text-white font-bold rounded-full text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-[#077FBA] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative flex items-center">
+          <button className="group px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300">
+            <span className="flex items-center">
               Start Your Swapping Journey
-              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-2 transition-transform duration-300" />
-            </div>
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Custom Styles */}
+      {/* Floating Icon Animation */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-10px) rotate(3deg); }
         }
-        
+
         .animate-float {
           animation: float 4s ease-in-out infinite;
         }
-        
+
         .delay-1000 { animation-delay: 1s; }
         .delay-2000 { animation-delay: 2s; }
       `}</style>

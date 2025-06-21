@@ -38,7 +38,7 @@ const AwesomeNavbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/home" className="relative group">
+            <Link to="/" className="relative group">
               <div className="w-[50px] h-[50px] bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                 <img src={Main_logo} className="w-[45px] h-[45px]" alt="Logo" />
               </div>
