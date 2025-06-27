@@ -2,7 +2,7 @@
 
 .marquee-columns {
   display: flex;
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
   gap: 1rem;
   padding: 2rem;
@@ -19,12 +19,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
-  animation: scrollUp 8s linear infinite;
+  gap: 2rem;
+  animation: scrollUp 20s linear infinite;
 }
 
 .marquee-track.reverse {
-  animation: scrollDown 12s linear infinite;
+  animation: scrollDown 30s linear infinite;
 }
 
 @keyframes scrollUp {

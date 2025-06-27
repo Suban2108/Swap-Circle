@@ -134,7 +134,7 @@ const AwesomeFooter = () => {
         <Card className="bg-white/5 border-white/10 backdrop-blur-sm rounded-2xl">
           <CardContent className="p-6 flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-center md:text-left space-y-1">
-              <h3 className="text-2xl font-semibold">Stay Updated</h3>
+              <h3 className="text-2xl font-semibold text-white">Stay Updated</h3>
               <p className="text-gray-300">Get the latest news and updates delivered to your inbox.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
