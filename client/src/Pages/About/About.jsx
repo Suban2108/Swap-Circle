@@ -16,27 +16,43 @@ import {
   Coffee,
   UserPlus
 } from 'lucide-react';
+import Banner_Image from '../../assets/About-banner.avif'
 
 // Hero Section Component
 const HeroSection = () => (
-  <div className="bg-gradient-to-br mt-[20px] from-orange-50 to-blue-50 py-20 px-6">
-    <div className="max-w-6xl mx-auto text-center">
-      <div className="flex justify-center mb-6">
-        <div className="bg-orange-100 p-4 rounded-full">
-          <Recycle className="w-16 h-16 text-orange-600" />
+  <div className="bg-gradient-to-r mt-[20px] from-blue-50 to-orange-500 py-20 px-6">
+    <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      
+      {/* Text Section */}
+      <div className="text-center md:text-left">
+        <div className="flex justify-center md:justify-start mb-6">
+          <div className="bg-orange-100 p-4 rounded-full inline-block">
+            <Recycle className="w-16 h-16 text-orange-600" />
+          </div>
+        </div>
+        <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          Welcome to <span className="text-orange-600">Swap-Circle</span>
+        </h1>
+        <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+          A local barter and donation platform that brings communities together through sustainable sharing. 
+          Turn your unused items into someone else's treasure while building meaningful connections.
+        </p>
+        <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
+          <span className="bg-white px-4 py-2 rounded-full shadow-sm border">🌱 Sustainability First</span>
+          <span className="bg-white px-4 py-2 rounded-full shadow-sm border">🤝 Community Driven</span>
+          <span className="bg-white px-4 py-2 rounded-full shadow-sm border">♻️ Zero Waste</span>
         </div>
       </div>
-      <h1 className="text-5xl font-bold text-gray-900 mb-6">
-        Welcome to <span className="text-orange-600">Swap-Circle</span>
-      </h1>
-      <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-        A local barter and donation platform that brings communities together through sustainable sharing. 
-        Turn your unused items into someone else's treasure while building meaningful connections.
-      </p>
-      <div className="flex flex-wrap justify-center gap-4 text-sm">
-        <span className="bg-white px-4 py-2 rounded-full shadow-sm border">🌱 Sustainability First</span>
-        <span className="bg-white px-4 py-2 rounded-full shadow-sm border">🤝 Community Driven</span>
-        <span className="bg-white px-4 py-2 rounded-full shadow-sm border">♻️ Zero Waste</span>
+
+      {/* Image Section */}
+      <div className="relative rounded-xl overflow-hidden shadow-xl border border-gray-200">
+        <img
+          src={Banner_Image}
+          alt="Community barter"
+          className="w-full h-full object-cover"
+        />
+        {/* Optional Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent"></div>
       </div>
     </div>
   </div>

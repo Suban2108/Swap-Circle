@@ -7,6 +7,7 @@ import {
   Zap,
   Sparkles
 } from 'lucide-react'
+// import BannerImage from '../../assets/Item-page-Banner' 
 
 const HeroSection = () => {
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 })
@@ -44,24 +45,30 @@ const HeroSection = () => {
   ]
 
   return (
-    <section className="relative min-h-[750px] flex items-center justify-center mt-[80px] bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white overflow-hidden">
-      {/* Dynamic Background Light */}
+    <section
+      className="relative min-h-[750px] flex items-center justify-center mt-[70px] text-white overflow-hidden bg-cover bg-center"
+      style={{
+        backgroundImage: `url(https://png.pngtree.com/thumb_back/fw800/background/20241014/pngtree-digital-trading-and-investment-concept-abstract-business-handshake-and-stock-market-image_16387730.jpg)`
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black opacity-65 z-0" />
+
+      {/* Dynamic Light Follower */}
       <div
-        className="absolute inset-0 transition-all duration-1000 ease-out"
+        className="absolute inset-0 transition-all duration-1000 ease-out z-10"
         style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(14,165,233,0.1), transparent 50%)`
+          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(176, 229, 253, 0.2), transparent 30%)`
         }}
       />
 
-      {/* Content Container */}
-      <div className="z-10 max-w-6xl px-6 text-center">
-        {/* Badge */}
+      {/* Content */}
+      <div className="z-20 max-w-6xl px-6 text-center">
         <div className="inline-flex items-center mb-6 mt-5 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-sm font-medium">
           <Sparkles className="w-4 h-4 mr-2 text-yellow-400" />
           A Smarter Way to Swap
         </div>
 
-        {/* Title */}
         <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
           Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-orange-400">Swap-Circle</span>
         </h1>
@@ -69,7 +76,6 @@ const HeroSection = () => {
           Connect, exchange, and build stronger communities through effortless sharing.
         </p>
 
-        {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <button className="flex items-center justify-center gap-2 px-6 py-3 text-white font-semibold rounded-full bg-gradient-to-r from-blue-600 to-orange-600 hover:scale-105 transition-transform">
             Start Swapping
@@ -83,7 +89,6 @@ const HeroSection = () => {
           </button>
         </div>
 
-        {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-4">
           {features.map((f, i) => (
             <div
@@ -102,9 +107,9 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Floating Gradient Circles */}
-      <div className="absolute top-[-200px] right-[-200px] w-[400px] h-[400px] bg-gradient-to-br from-pink-500/20 to-purple-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-200px] left-[-200px] w-[400px] h-[400px] bg-gradient-to-br from-cyan-500/20 to-green-500/10 rounded-full blur-3xl" />
+      {/* Decorative Background Circles */}
+      <div className="absolute top-[-200px] right-[-200px] w-[400px] h-[400px] bg-gradient-to-br from-pink-500/20 to-purple-500/10 rounded-full blur-3xl z-0" />
+      <div className="absolute bottom-[-200px] left-[-200px] w-[400px] h-[400px] bg-gradient-to-br from-cyan-500/20 to-green-500/10 rounded-full blur-3xl z-0" />
     </section>
   )
 }

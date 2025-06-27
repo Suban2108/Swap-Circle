@@ -88,7 +88,7 @@ const ModernHowItWorks = () => {
   ]
 
   return (
-    <section className="relative py-20 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900 overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900 overflow-hidden overflow-x-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-gradient-to-r from-pink-400/15 to-yellow-400/15 rounded-full blur-3xl animate-pulse delay-1000" />
@@ -99,16 +99,16 @@ const ModernHowItWorks = () => {
         ))}
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <div className="inline-flex items-center px-5 py-2 rounded-full bg-white/70 dark:bg-slate-800/70 text-xs font-medium text-slate-600 dark:text-slate-300 mb-6 shadow-md border border-blue-200/50 dark:border-slate-600/50">
             <Rocket className="w-4 h-4 mr-2 text-blue-500" />
             Revolutionary Process • Proven Results
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
             How It Works
           </h2>
-          <p className="text-base text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
             Experience the future of sustainable exchange with our{" "}
             <span className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               AI-powered platform
@@ -117,7 +117,7 @@ const ModernHowItWorks = () => {
           </p>
         </div>
 
-        <div className="flex space-x-4 overflow-x-auto p-8 mb-12">
+        <div className="flex space-x-4 overflow-x-auto p-4 sm:p-8 mb-12 scroll-smooth snap-x">
           {steps.map((step, index) => {
             const isActive = activeStep === index
             const isHovered = hoveredStep === index
@@ -126,13 +126,14 @@ const ModernHowItWorks = () => {
             return (
               <div
                 key={step.id}
-                className={`group relative p-5 rounded-2xl border transition-all duration-500 cursor-pointer overflow-hidden w-[300px] ${
-                  isHighlighted 
-                    ? "scale-105 shadow-xl border-white/50 dark:border-slate-600/50" 
+                className={`snap-start w-[300px] flex-shrink-0 group relative p-5 rounded-2xl border transition-all duration-500 cursor-pointer overflow-hidden ${
+                  isHighlighted
+                    ? "scale-105 shadow-xl border-white/50 dark:border-slate-600/50"
                     : "shadow-sm border-white/30 dark:border-slate-700/30 hover:scale-102"
                 } bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm`}
                 onMouseEnter={() => setHoveredStep(index)}
                 onMouseLeave={() => setHoveredStep(null)}
+                style={{ scrollSnapAlign: "start" }}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${step.bgGradient} opacity-0 transition-opacity duration-500 ${
                   isHighlighted ? "opacity-100" : "group-hover:opacity-50"
@@ -146,8 +147,8 @@ const ModernHowItWorks = () => {
                       {step.icon}
                     </div>
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all ${
-                      isHighlighted 
-                        ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm scale-110" 
+                      isHighlighted
+                        ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm scale-110"
                         : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                     }`}>
                       {isHighlighted ? <CheckCircle className="w-4 h-4 text-green-500" /> : step.id}
@@ -156,7 +157,7 @@ const ModernHowItWorks = () => {
 
                   <div className="space-y-2">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                      <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
                         {step.title}
                       </h3>
                       <p className={`text-xs font-medium bg-gradient-to-r ${step.gradient} bg-clip-text text-transparent`}>
@@ -221,9 +222,9 @@ const ModernHowItWorks = () => {
             </div>
           </div>
 
-          <button className="group relative px-6 py-3 bg-gradient-to-r from-blue-600 to-orange-600 text-white font-semibold text-base rounded-xl shadow-sm hover:shadow-sm transition-all duration-300 transform hover:scale-105 overflow-hidden mb-3">
+          <button className="group relative w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-orange-600 text-white font-semibold text-base rounded-xl shadow-sm hover:shadow-sm transition-all duration-300 transform hover:scale-105 overflow-hidden mb-3">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-800 to-orange-900 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="relative flex items-center">
+            <span className="relative flex items-center justify-center">
               <Play className="mr-2 w-4 h-4" />
               Start Your Journey Today
               <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -241,24 +242,9 @@ const ModernHowItWorks = () => {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
           50% { transform: translateY(-20px) rotate(3deg); }
         }
-
-        @keyframes glow {
-          0%, 100% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
-          50% { box-shadow: 0 0 60px rgba(147, 51, 234, 0.4); }
-        }
-
-        .animate-float {
-          animation: float 8s ease-in-out infinite;
-        }
-
-        .animate-glow {
-          animation: glow 4s ease-in-out infinite;
-        }
-
         .hover\\:scale-102:hover {
           transform: scale(1.02);
         }
-
         .delay-1000 { animation-delay: 1s; }
         .delay-2000 { animation-delay: 2s; }
         .delay-3000 { animation-delay: 3s; }

@@ -60,6 +60,7 @@ const AwesomeFooter = () => {
 
   return (
     <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+      <div className='text-center bg-zinc-600/90 cursor-pointer' onClick={scrollToTop}>Back to top</div>
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#077FBA] via-orange-500 to-[#077FBA]" />
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#077FBA]/10 to-orange-500/10 rounded-full blur-3xl" />
@@ -184,7 +185,7 @@ const AwesomeFooter = () => {
       <Button
         variant="ghost"
         onClick={scrollToTop}
-        className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-gradient-to-r from-[#077FBA] to-orange-500 text-white shadow-2xl hover:scale-110 transition z-50"
+        className="fixed bottom-8 left-[50%] w-10 h-10 rounded-full bg-gradient-to-r from-[#077FBA] to-orange-500 text-white shadow-2xl hover:scale-110 transition z-50"
       >
         <ArrowUp className="w-5 h-5" />
       </Button>

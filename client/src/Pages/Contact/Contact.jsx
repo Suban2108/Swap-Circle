@@ -4,6 +4,7 @@ import {
   Recycle, Heart, Calendar, BarChart3, Send,
   CheckCircle
 } from 'lucide-react';
+import HeroSection from './HeroSection';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -91,6 +92,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-sky-100 mt-[80px]">
+    <HeroSection/>
       <main className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}

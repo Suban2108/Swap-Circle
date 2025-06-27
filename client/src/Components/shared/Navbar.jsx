@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Home, Info, Users, Mail, LayoutListIcon} from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import Main_logo from '../../assets/Main-logo(1).png'
 import { Button } from '../ui/button'
@@ -24,12 +24,13 @@ const AwesomeNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Features', href: '/features' },
-    { name: 'Contact', href: '/contact' },
-  ]
+const navItems = [
+  { name: 'Home', href: '/', icon: <Home className="w-4 h-4 mr-2" /> },
+  { name: 'About', href: '/about', icon: <Info className="w-4 h-4 mr-2" /> },
+  { name: 'Items', href: '/items', icon: <LayoutListIcon className="w-4 h-4 mr-2" /> },
+  { name: 'Groups', href: '/groups', icon: <Users className="w-4 h-4 mr-2" /> },
+  { name: 'Contact', href: '/contact', icon: <Mail className="w-4 h-4 mr-2" /> },
+]
 
   const isActive = (href) => location.pathname === href || location.hash === href
 
@@ -38,15 +39,15 @@ const AwesomeNavbar = () => {
       className={`fixed top-0 w-full z-20 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'
         }`}
     >
-      <div className="max-w-7xl mx-auto py-4">
+      <div className="max-w-[95%] mx-auto py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <Link to="/" className="relative group">
-              <div className="w-[50px] h-[50px] bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <img src={Main_logo} className="w-[45px] h-[45px]" alt="Logo" />
+              <div className="w-[40px] h-[40px] bg-gradient-to-br from-orange-400 to-orange-600 rounded-[10px] flex items-center justify-center shadow-lg">
+                <img src={Main_logo} className="w-[35px] h-[35px]" alt="Logo" />
               </div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-[#077FBA] rounded-xl blur opacity-30 group-hover:opacity-60 transition" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-[#077FBA] rounded-sm blur opacity-30 group-hover:opacity-60 transition" />
             </Link>
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
               Swap-Circle
@@ -60,9 +61,10 @@ const AwesomeNavbar = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`group relative text-sm font-medium px-2 py-1 cursor-pointer transition-colors duration-300 ${isActive(item.href) ? 'text-blue-600 font-semibold' : 'text-orange-600 hover:text-orange-800'
+                className={`group flex relative text-sm font-medium px-2 py-1 cursor-pointer transition-colors duration-300 ${isActive(item.href) ? 'text-blue-600 font-semibold' : 'text-orange-600 hover:text-orange-800'
                   }`}
               >
+              {item.icon}
                 {item.name}
                 <span
                   className={`absolute left-0 -bottom-0.5 h-[2px] w-full transition-all duration-500 transform scale-x-0 group-hover:scale-x-100 origin-left ${isActive(item.href)
@@ -142,11 +144,12 @@ const AwesomeNavbar = () => {
                 key={item.name}
                 to={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`block px-4 py-2 rounded-md text-sm font-medium transition ${isActive(item.href)
+                className={`flex px-4 py-2 rounded-md text-sm font-medium transition ${isActive(item.href)
                   ? 'text-orange-600 underline underline-offset-4 font-semibold'
                   : 'text-muted-foreground hover:text-orange-600'
                   }`}
               >
+              {item.icon}
                 {item.name}
               </Link>
             ))}
