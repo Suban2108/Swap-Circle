@@ -1,36 +1,43 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-// Schema for registered users in a private barter/donation circle
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true // Full name is required
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true // Unique identifier for invite-only access
-    },
-    password: {
-        type: String,
-        required: true // Stored as hashed password
-    },
-    profilePic: {
-        type: String // Optional avatar image URL
-    },
-    circleId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'circle' // Refers to the user's private group
-    },
-    karmaPoints: {
-        type: Number,
-        default: 0 // Total karma points earned through good actions
-    },
-    joinedEvents: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'event' // Events the user has participated in
-    }]
-}, { minimize: false });
+const itemSchema = new mongoose.Schema({
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true
+  },
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  images: [{
+    type: String // URLs of uploaded images
+  }],
+  category: {
+    type: String,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ['donate', 'barter'],
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['available', 'pending', 'exchanged', 'removed'],
+    default: 'available'
+  },
+  deliveryNotes: {
+    type: String
+  }
+}, {
+  timestamps: true
+})
 
-const userModel = mongoose.models.user || mongoose.model("user", userSchema);
-export default userModel;
+const itemModel = mongoose.models.item || mongoose.model('item', itemSchema)
+export default itemModel

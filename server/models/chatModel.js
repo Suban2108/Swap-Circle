@@ -1,34 +1,37 @@
 import mongoose from 'mongoose';
 
-// Schema for storing chat messages between users in a swap or donation context
-const messageSchema = new mongoose.Schema({
-    senderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-        required: true // Who sent the message
-    },
-    receiverId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-        required: true // Who received the message
-    },
-    itemId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'item' // Optional: item being discussed
-    },
-    content: {
-        type: String,
-        required: true // Actual chat text
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now // When message was sent
-    },
-    read: {
-        type: Boolean,
-        default: false // For unread message indicators
-    }
+// Schema for storing chat chats between users or in group
+const chatSchema = new mongoose.Schema({
+  senderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true
+  },
+  receiverId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user'
+  },
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'circle' // Group chats linked to a circle or group
+  },
+  itemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'item'
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  read: {
+    type: Boolean,
+    default: false
+  }
 }, { minimize: false });
 
-const messageModel = mongoose.models.message || mongoose.model("message", messageSchema);
-export default messageModel;
+const chatModel = mongoose.models.chat || mongoose.model("chat", chatSchema);
+export default chatModel;

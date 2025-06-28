@@ -3,9 +3,9 @@ import {
   createOffer,
   getOffersByItem,
   getOffersByUser,
-  updateOffer,
+  updateOfferStatus,
   deleteOffer
-} from '../controllers/offerControllers.js'
+} from '../controllers/offerController.js'
 
 const offerRouter = express.Router()
 
@@ -19,7 +19,7 @@ offerRouter.get('/item/:itemId', getOffersByItem)
 offerRouter.get('/user/:userId', getOffersByUser)
 
 // http://localhost:5005/api/offers/:id
-offerRouter.put('/:id', updateOffer)
+offerRouter.put('/:id', updateOfferStatus)
 
 // http://localhost:5005/api/offers/:id
 offerRouter.delete('/:id', deleteOffer)

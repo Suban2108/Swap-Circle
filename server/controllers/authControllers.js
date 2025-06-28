@@ -85,20 +85,6 @@ const loginByEmail = async (req, res) => {
   }
 };
 
-// Logout controller
-const logout = async (req, res) => {
-  try {
-    // Since JWT is stateless, we can't invalidate the token on the server side
-    // The client needs to remove the token from storage
-    // Here we just send a success response
-    res.status(200).json({
-      message: 'Logged out successfully'
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error logging out', error: error.message });
-  }
-};
-
 //Login By Google
 const googleByLogin = async (req, res) => {
   try {

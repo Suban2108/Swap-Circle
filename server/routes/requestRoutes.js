@@ -4,7 +4,7 @@ import {
   createRequest,
   updateRequest,
   deleteRequest
-} from '../controllers/requestControllers.js'
+} from '../controllers/requestController.js'
 
 const requestRouter = express.Router()
 

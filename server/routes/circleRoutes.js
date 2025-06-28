@@ -4,7 +4,7 @@ import {
   getCircleDetails,
   joinCircle,
   getCircleMembers
-} from '../controllers/circleControllers.js'
+} from '../controllers/circleController.js'
 
 const circleRouter = express.Router()
 

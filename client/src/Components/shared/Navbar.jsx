@@ -13,6 +13,7 @@ import {
 
 import default_user_image from '../../assets/Default_user_image.jpeg'
 import { useAuth } from '../../context/authContext'
+import toast from 'react-hot-toast'
 
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -43,8 +44,12 @@ const AwesomeNavbar = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('profileImage')
     localStorage.removeItem('userId')
-    setIsLoggedIn(false)
-    window.location.href = '/'
+
+    toast.success('Logged Out successful! Redirecting...');
+    setTimeout(() => {
+      setIsLoggedIn(false)
+      window.location.href = '/';
+    }, 1500);
   }
 
   const navItems = [

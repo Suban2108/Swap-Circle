@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
+import { useAuth } from '../../context/authContext'; 
 
 
 const AuthForms = () => {
@@ -17,6 +18,8 @@ const AuthForms = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [mode, setMode] = useState("signin");
+
+    const { PORT } = useAuth();
 
     const location = useLocation();
 
@@ -50,7 +53,7 @@ const AuthForms = () => {
                     return;
                 }
 
-                const res = await axios.post('http://localhost:5005/api/auth/register', {
+                const res = await axios.post(`${PORT}/api/auth/register`, {
                     email: formValues.email,
                     password: formValues.password,
                     name: formValues.fullName,
@@ -66,7 +69,7 @@ const AuthForms = () => {
             }
 
             if (isLogin) {
-                const res = await axios.post('http://localhost:5005/api/auth/login', {
+                const res = await axios.post(`${PORT}/api/auth/login`, {
                     email: formValues.email,
                     password: formValues.password,
                 });
@@ -116,7 +119,7 @@ const AuthForms = () => {
                                 <GoogleLogin
                                     onSuccess={async (credentialResponse) => {
                                         try {
-                                            const res = await axios.post('http://localhost:5005/api/auth/google', {
+                                            const res = await axios.post(`${PORT}/api/auth/google`, {
                                                 token: credentialResponse.credential,
                                             });
                                             localStorage.setItem('token', res.data.token);

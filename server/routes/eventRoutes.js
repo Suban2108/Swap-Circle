@@ -5,7 +5,7 @@ import {
   getEventById,
   joinEvent,
   rewardParticipants
-} from '../controllers/eventControllers.js'
+} from '../controllers/eventController.js'
 
 const eventRouter = express.Router()
 

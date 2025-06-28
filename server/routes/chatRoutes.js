@@ -1,23 +1,23 @@
 import express from 'express'
 import {
-  startChat,
-  getChatMessages,
   sendMessage,
-  getUserChats
-} from '../controllers/chatControllers.js'
+  getOneToOneMessages,
+  getGroupMessages,
+  getUserChatContacts
+} from '../controllers/chatController.js'
 
 const chatRouter = express.Router()
 
-// http://localhost:5005/api/chat/start
-chatRouter.post('/start', startChat)
+// POST http://localhost:5005/api/chat/send
+chatRouter.post('/send', sendMessage)     //receiver for 1 to 1 & group as receviver for group
 
-// http://localhost:5005/api/chat/:threadId
-chatRouter.get('/:threadId', getChatMessages)
+// GET /api/chat/one-to-one?senderId=...&receiverId=...
+chatRouter.get('/one-to-one', getOneToOneMessages)
 
-// http://localhost:5005/api/chat/:threadId/message
-chatRouter.post('/:threadId/message', sendMessage)
+// GET /api/chat/group/:groupId
+chatRouter.get('/group/:groupId', getGroupMessages)
 
-// http://localhost:5005/api/chat/user/:userId
-chatRouter.get('/user/:userId', getUserChats)
+// GET /api/chat/contacts/:userId
+chatRouter.get('/contacts/:userId', getUserChatContacts) //This fetches a list of users that this user has chatted with in one-to-one mode.
 
 export default chatRouter

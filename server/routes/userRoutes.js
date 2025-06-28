@@ -1,4 +1,5 @@
 import express from 'express'
+import { getUser, updateUser, deleteUser, getUsersByCircle } from '../controllers/userController.js'; 
 
 const userRouter = express.Router();
 
@@ -12,6 +13,6 @@ userRouter.put('/:id',updateUser)
 userRouter.delete('/:id',deleteUser)
 
 // http://localhost:5005/api/users/circle/:circleId
-userRouter.get('/circle/:circleId',userInCircle)
+userRouter.get('/circle/:circleId',getUsersByCircle)
 
 export default userRouter

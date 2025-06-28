@@ -2,6 +2,14 @@ import express from "express"
 import cors from "cors"
 import { connectDB } from "./config/db.js"
 import authRouter from "./routes/authRoutes.js"
+import userRouter from "./routes/userRoutes.js"
+import circleRouter from "./routes/circleRoutes.js"
+import itemRouter from "./routes/itemRoutes.js"
+import offerRouter from "./routes/offerRoutes.js"
+import requestsRouter from "./routes/requestRoutes.js"
+import chatRouter from "./routes/chatRoutes.js"
+import karmaRouter from "./routes/karmaRoutes.js"
+import eventRouter from "./routes/eventRoutes.js"
 
 import 'dotenv/config'
 
@@ -21,14 +29,14 @@ connectDB();
 
 //API Endpoints
   app.use('/api/auth', authRouter);
-  // app.use('/api/items', itemRouter);
-  // app.use('/api/users',userRouter);
-  // app.use('/api/circles',circleRouter);
-  // app.use('/api/offer', offerRouter);
-  // app.use('/api/requests',requestsRouter);
-  // app.use('/api/chat',chatRouter);
-  // app.use('/api/karma',karmaRouter);
-  // app.use('/api/events',eventRouter);
+  app.use('/api/items', itemRouter);
+  app.use('/api/users',userRouter);
+  app.use('/api/circles',circleRouter);
+  app.use('/api/offers', offerRouter);
+  app.use('/api/requests',requestsRouter);
+  app.use('/api/chat',chatRouter);
+  app.use('/api/karma',karmaRouter);
+  app.use('/api/events',eventRouter);
   // app.use('/api/stats',statsRouter);
   // app.use('/api/admin',adminRouter);
 
