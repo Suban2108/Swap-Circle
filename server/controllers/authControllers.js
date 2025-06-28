@@ -4,6 +4,8 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/userModel.js'
+import { OAuth2Client } from 'google-auth-library'
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 
 // Register controller 
@@ -97,4 +99,29 @@ const logout = async (req, res) => {
   }
 };
 
-export {loginByEmail,registerByEmail}
+//Login By Google
+const googleByLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { name, email, picture } = payload;
+
+    // TODO: Find or create user in DB
+
+    return res.status(200).json({
+      user: { name, email, picture },
+      message: 'Login success',
+    });
+  } catch (err) {
+    console.error('OAuth Error:', err);
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+}
+
+export {loginByEmail,registerByEmail,googleByLogin}

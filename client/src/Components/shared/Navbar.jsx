@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Menu, X, Home, Info, Users, Mail, LayoutListIcon} from 'lucide-react'
+import { Menu, X, Home, Info, Users, Mail, LayoutListIcon } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import Main_logo from '../../assets/Main-logo(1).png'
 import { Button } from '../ui/button'
@@ -11,34 +11,54 @@ import {
   DropdownMenuSeparator,
 } from '../ui/dropdown-menu'
 
+import default_user_image from '../../assets/Default_user_image.jpeg'
+import { useAuth } from '../../context/authContext'
+
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [profileImage, setProfileImage] = useState(null)
 
+  const { token, userId } = useAuth()
   const location = useLocation()
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
+    const handleScroll = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-const navItems = [
-  { name: 'Home', href: '/', icon: <Home className="w-4 h-4 mr-2" /> },
-  { name: 'About', href: '/about', icon: <Info className="w-4 h-4 mr-2" /> },
-  { name: 'Items', href: '/items', icon: <LayoutListIcon className="w-4 h-4 mr-2" /> },
-  { name: 'Groups', href: '/groups', icon: <Users className="w-4 h-4 mr-2" /> },
-  { name: 'Contact', href: '/contact', icon: <Mail className="w-4 h-4 mr-2" /> },
-]
+  // Sync isLoggedIn state with token
+  useEffect(() => {
+    setIsLoggedIn(!!token)
+  }, [token])
+
+  useEffect(() => {
+    const img = localStorage.getItem('profileImage')
+    if (img) setProfileImage(img)
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('profileImage')
+    localStorage.removeItem('userId')
+    setIsLoggedIn(false)
+    window.location.href = '/'
+  }
+
+  const navItems = [
+    { name: 'Home', href: '/', icon: <Home className="w-4 h-4 mr-2" /> },
+    { name: 'About', href: '/about', icon: <Info className="w-4 h-4 mr-2" /> },
+    { name: 'Items', href: '/items', icon: <LayoutListIcon className="w-4 h-4 mr-2" /> },
+    { name: 'Groups', href: '/groups', icon: <Users className="w-4 h-4 mr-2" /> },
+    { name: 'Contact', href: '/contact', icon: <Mail className="w-4 h-4 mr-2" /> },
+  ]
 
   const isActive = (href) => location.pathname === href || location.hash === href
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-20 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'
-        }`}
-    >
+    <nav className={`fixed top-0 w-full z-20 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'}`}>
       <div className="max-w-[95%] mx-auto py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -54,17 +74,15 @@ const navItems = [
             </span>
           </div>
 
-
-          {/* Right Controls */}
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`group flex relative text-sm font-medium px-2 py-1 cursor-pointer transition-colors duration-300 ${isActive(item.href) ? 'text-blue-600 font-semibold' : 'text-orange-600 hover:text-orange-800'
-                  }`}
+                className={`group flex relative text-sm font-medium px-2 py-1 cursor-pointer transition-colors duration-300 ${isActive(item.href) ? 'text-blue-600 font-semibold' : 'text-orange-600 hover:text-orange-800'}`}
               >
-              {item.icon}
+                {item.icon}
                 {item.name}
                 <span
                   className={`absolute left-0 -bottom-0.5 h-[2px] w-full transition-all duration-500 transform scale-x-0 group-hover:scale-x-100 origin-left ${isActive(item.href)
@@ -79,12 +97,12 @@ const navItems = [
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <img
-                    src="https://i.pravatar.cc/150?img=5"
+                    src={profileImage || default_user_image}
                     alt="Profile"
-                    className={`w-12 h-12 rounded-full border-2 ${location.pathname.includes('dashboard') || location.pathname.includes('profile')
-                      ? 'border-orange-500 ring-2 ring-blue-400 ring-offset-2'
-                      : 'border-orange-300'
-                      } cursor-pointer transition hover:scale-105`}
+                    className={`w-12 h-12 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''}`}
+                    onError={(e) => {
+                      e.target.src = '/fallback.png'
+                    }}
                   />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
@@ -95,7 +113,7 @@ const navItems = [
                     <Link to="/profile">Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsLoggedIn(false)} className="text-red-500">
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-500">
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -105,10 +123,7 @@ const navItems = [
                 <Link to="/login?mode=signin">
                   <Button
                     variant="ghost"
-                    className={`hover:text-orange-800 ${location.pathname === '/login' && location.search.includes('signin')
-                      ? 'text-blue-600 underline underline-offset-4'
-                      : 'text-orange-600'
-                      }`}
+                    className={`hover:text-orange-800 ${location.pathname === '/login' && location.search.includes('signin') ? 'text-blue-600 underline underline-offset-4' : 'text-orange-600'}`}
                   >
                     Sign in
                   </Button>
@@ -116,10 +131,7 @@ const navItems = [
                 <Link to="/login?mode=signup">
                   <Button
                     variant="default"
-                    className={`bg-gradient-to-r from-[#077FBA] to-orange-500 text-white ${location.pathname === '/login' && location.search.includes('signup')
-                      ? 'ring-2 ring-offset-2 ring-blue-400'
-                      : ''
-                      }`}
+                    className={`bg-gradient-to-r from-[#077FBA] to-orange-500 text-white ${location.pathname === '/login' && location.search.includes('signup') ? 'ring-2 ring-offset-2 ring-blue-400' : ''}`}
                   >
                     Sign up
                   </Button>
@@ -128,7 +140,7 @@ const navItems = [
             )}
           </div>
 
-          {/* Mobile Toggle */}
+          {/* Mobile toggle */}
           <div className="md:hidden">
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="h-6 w-6 text-orange-600" /> : <Menu className="h-6 w-6 text-orange-600" />}
@@ -136,7 +148,7 @@ const navItems = [
           </div>
         </div>
 
-        {/* Mobile Dropdown */}
+        {/* Mobile nav */}
         {isOpen && (
           <div className="mt-4 md:hidden space-y-2">
             {navItems.map((item) => (
@@ -144,12 +156,9 @@ const navItems = [
                 key={item.name}
                 to={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex px-4 py-2 rounded-md text-sm font-medium transition ${isActive(item.href)
-                  ? 'text-orange-600 underline underline-offset-4 font-semibold'
-                  : 'text-muted-foreground hover:text-orange-600'
-                  }`}
+                className={`flex px-4 py-2 rounded-md text-sm font-medium transition ${isActive(item.href) ? 'text-orange-600 underline underline-offset-4 font-semibold' : 'text-muted-foreground hover:text-orange-600'}`}
               >
-              {item.icon}
+                {item.icon}
                 {item.name}
               </Link>
             ))}
@@ -171,10 +180,7 @@ const navItems = [
                   <Link to="/profile" className="block text-muted-foreground hover:text-primary">
                     Profile
                   </Link>
-                  <button
-                    onClick={() => setIsLoggedIn(false)}
-                    className="text-red-500 hover:underline"
-                  >
+                  <button onClick={handleLogout} className="text-red-500 hover:underline">
                     Sign out
                   </button>
                 </div>

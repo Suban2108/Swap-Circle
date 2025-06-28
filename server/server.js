@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import { connectDB } from "./config/db.js"
-// import authRouter from "./routes/authRoutes.js"
+import authRouter from "./routes/authRoutes.js"
 
 import 'dotenv/config'
 
@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 connectDB();
 
 //API Endpoints
-  // app.use('/api/auth', authRouter);
+  app.use('/api/auth', authRouter);
   // app.use('/api/items', itemRouter);
   // app.use('/api/users',userRouter);
   // app.use('/api/circles',circleRouter);

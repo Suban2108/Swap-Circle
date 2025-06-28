@@ -46,7 +46,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative min-h-[750px] flex items-center justify-center mt-[70px] text-white overflow-hidden bg-cover bg-center"
+      className="relative min-h-[750px] flex items-center justify-center mt-[60px] text-white overflow-hidden bg-cover bg-center"
       style={{
         backgroundImage: `url(https://png.pngtree.com/thumb_back/fw800/background/20241014/pngtree-digital-trading-and-investment-concept-abstract-business-handshake-and-stock-market-image_16387730.jpg)`
       }}
