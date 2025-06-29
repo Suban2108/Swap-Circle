@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema({
 
   avatar: {
     type: String,
+    default:"/default/Default_user_image.jpeg"
   },
 
   coverImage: {

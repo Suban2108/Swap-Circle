@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
 
   const PORT = 'http://localhost:5005'
+  const FRONTEND_PORT = 'http://localhost:3000'
 
   // Load token/userId from localStorage on app load
   useEffect(() => {
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, userId, PORT }}>
+    <AuthContext.Provider value={{ token, userId, PORT, FRONTEND_PORT }}>
       {children}
     </AuthContext.Provider>
   );

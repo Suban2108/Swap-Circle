@@ -1,5 +1,7 @@
 import express from 'express'
-import { getUser, updateUser, deleteUser, getUsersByCircle } from '../controllers/userController.js'; 
+import { getUser, updateUser, deleteUser, getUsersByCircle, uploadProfileImage } from '../controllers/userController.js'; 
+import authRouter from './authRoutes.js';
+import upload from "../middleware/uploadMiddleware.js";
 
 const userRouter = express.Router();
 
@@ -14,5 +16,8 @@ userRouter.delete('/:id',deleteUser)
 
 // http://localhost:5005/api/users/circle/:circleId
 userRouter.get('/circle/:circleId',getUsersByCircle)
+
+
+userRouter.post("/:id/upload", upload.single("image"), uploadProfileImage);
 
 export default userRouter

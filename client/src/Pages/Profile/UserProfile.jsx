@@ -1,31 +1,8 @@
 import React, { useEffect, useState } from "react"
 import {
-  User,
-  Mail,
-  MapPin,
-  Calendar,
-  Heart,
-  Package,
-  Gift,
-  Award,
-  Star,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  Settings,
-  Camera,
-  Save,
-  X,
-  Clock,
-  TrendingUp,
-  Share2,
-  Upload,
-  CheckCircle,
-  Globe,
-  Instagram,
-  Twitter,
-  Facebook,
+  User, Mail, MapPin, Calendar, Star, Package, Award,
+  Clock, Settings, Camera, Save, X, Edit, Share2, Upload,
+  CheckCircle, Globe, Instagram, Twitter, Facebook
 } from "lucide-react"
 import SettingFeatures from "./UserComponent/Settings"
 import Achievements from "./UserComponent/Achievements"
@@ -35,62 +12,144 @@ import Overview from "./UserComponent/Overview"
 import Items from "./UserComponent/Items"
 import { useAuth } from "../../context/authContext"
 import axios from "axios"
+import toast from "react-hot-toast"
+import ImageCropper from "../../Components/shared/ImageCropper"
+import default_user_image from "../../assets/Default_user_image.jpeg"
+import default_banner_image from "../../assets/default_cover_banner_image.webp"
 
+import cropImageHelper from '../../Components/shared/cropImageLayout.js'
+
+// Helper function to crop image
+const getCroppedImg = async (imageSrc, pixelCrop) => {
+  const image = new Image()
+  image.src = imageSrc
+  await new Promise((resolve) => (image.onload = resolve))
+
+  const canvas = document.createElement('canvas')
+  canvas.width = pixelCrop.width
+  canvas.height = pixelCrop.height
+  const ctx = canvas.getContext('2d')
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  )
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      const file = new File([blob], "cropped.jpeg", { type: "image/jpeg" })
+      resolve(file)
+    }, "image/jpeg")
+  })
+}
 
 export default function UserProfile() {
   const [activeTab, setActiveTab] = useState("items")
- const [userData, setUserData] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [showImageUpload, setShowImageUpload] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false)
+  const [showImageUpload, setShowImageUpload] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [userData, setUserData] = useState(null)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [imageToCrop, setImageToCrop] = useState(null)
 
-
-  const USER_ID = localStorage.getItem('userId')
-  const { PORT } = useAuth();
+  const { PORT, userId } = useAuth()
+  const USER_ID = userId || localStorage.getItem("userId")
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`${PORT}/api/users/${USER_ID}`);
+        const { data } = await axios.get(`${PORT}/api/users/${USER_ID}`)
         setUserData({
           ...data,
-          avatar: data.avatar || "https://i.pravatar.cc/150?img=5",
-          coverImage: data.coverImage || "https://i.pravatar.cc/150?img=4",
+          avatar: data.avatar || default_user_image,
+          coverImage: data.coverImage || default_banner_image,
           socialLinks: data.socialLinks || {
             instagram: "",
             twitter: "",
             facebook: "",
           },
-        });
+        })
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error fetching user:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    fetchUser();
-  }, []);
+    }
+
+    fetchUser()
+  }, [])
 
   const handleInputChange = (field, value) => {
-    setUserData((prev) => ({ ...prev, [field]: value }));
-  };
+    setUserData((prev) => ({ ...prev, [field]: value }))
+  }
 
   const handleSocialChange = (field, value) => {
     setUserData((prev) => ({
       ...prev,
       socialLinks: { ...prev.socialLinks, [field]: value },
-    }));
-  };
+    }))
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        setImageToCrop(reader.result)
+        setShowCropper(true)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleCropComplete = async (croppedAreaPixels) => {
+    const croppedFile = await getCroppedImg(imageToCrop, croppedAreaPixels)
+    setSelectedFile(croppedFile)
+    setShowCropper(false)
+  }
+
+  const handleUploadImage = async () => {
+    if (!selectedFile) return
+
+    const formData = new FormData()
+    formData.append("image", selectedFile)
+
+    try {
+      const { data } = await axios.post(`${PORT}/api/users/${USER_ID}/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
+      setUserData((prev) => ({ ...prev, avatar: data.avatar }))
+      setShowImageUpload(false)
+      setSelectedFile(null)
+      toast.success("Image Updated!")
+
+      setInterval(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error("Upload failed:", error)
+    }
+  }
 
   const handleSaveProfile = async () => {
     try {
-      const response = await axios.put(`${PORT}/api/users/${USER_ID}`, userData);
-      setUserData(response.data);
-      setIsEditing(false);
+      const response = await axios.put(`${PORT}/api/users/${USER_ID}`, userData)
+      setUserData(response.data)
+      setIsEditing(false)
+      toast.success("Profile Updated")
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Update error:", error)
     }
-  };
+  }
 
   const tabItems = [
     { id: "overview", label: "Overview", icon: <User className="w-4 h-4" /> },
@@ -101,50 +160,37 @@ export default function UserProfile() {
     { id: "settings", label: "Settings", icon: <Settings className="w-4 h-4" /> },
   ]
 
-
   const renderContent = () => {
     switch (activeTab) {
-      case "overview":
-        return <Overview/>
-      case "items":
-        return <Items/>
-      case "activity":
-        return <Activity/>
-      case "reviews":
-        return <Reviews/>
-      case "achievements":
-        return <Achievements/>
-      case "settings":
-        return <SettingFeatures/>
-      default:
-        return renderOverview()
+      case "overview": return <Overview />
+      case "items": return <Items />
+      case "activity": return <Activity />
+      case "reviews": return <Reviews />
+      case "achievements": return <Achievements />
+      case "settings": return <SettingFeatures />
+      default: return <Overview />
     }
   }
 
-    if (loading || !userData) return <div className="p-6">Loading...</div>;
+  if (loading || !userData) return <div className="p-6 mt-20">Loading...</div>
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Cover Image */}
-      <div className="relative h-48 bg-gradient-to-r from-purple-600 to-blue-600">
-        <img
-          src={userData.coverImage}
-          alt="Cover"
-          className="w-full h-full object-cover opacity-50"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-blue-600 opacity-60" />
+      <div className="relative h-80 bg-gradient-to-r from-blue-600 to-blue-600">
+        <img src={default_banner_image} alt="Cover" className="w-full h-full object-cover opacity-50" />
       </div>
 
-      {/* Profile Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
+      {/* Profile Card */}
+      <div className="max-w-4xl mx-auto px-4 -mt-20 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex items-start space-x-6">
             {/* Avatar */}
             <div className="relative">
               <img
-                src={userData.avatar}
+                src={`${PORT}${userData.avatar}`}
                 alt="Avatar"
-                className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
+                className="w-32 h-32 object-cover rounded-full border-4 border-purple-500 shadow-md"
               />
               <button
                 onClick={() => setShowImageUpload(true)}
@@ -322,32 +368,27 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="px-4 sm:px-6 lg:px-8 mt-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-1">
-            <nav className="flex space-x-1">
-              {tabItems.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-orange-100 text-orange-700"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+      {/* Tabs */}
+      <div className="px-4 mt-6">
+        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border p-1">
+          <nav className="flex space-x-1">
+            {tabItems.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab.id ? "bg-orange-100 text-orange-700" : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                   }`}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
+      {/* Content */}
+      <div className="px-4 py-6">
         <div className="max-w-4xl mx-auto">{renderContent()}</div>
       </div>
 
@@ -356,25 +397,39 @@ export default function UserProfile() {
         <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Upload Profile Picture</h2>
-            <div className="border-dashed border-2 border-gray-300 p-6 rounded-lg text-center">
+            <div onClick={() => document.getElementById("fileUpload").click()} className="border-dashed border-2 border-gray-300 p-6 rounded-lg text-center cursor-pointer">
               <Upload className="w-10 h-10 mx-auto text-gray-400" />
-              <p className="text-gray-600 mt-2">Drag and drop or click to upload</p>
-              <input type="file" className="hidden" />
+              <p className="text-gray-600 mt-2">
+                {selectedFile ? selectedFile.name : "Click to select a file"}
+              </p>
+              <input
+                id="fileUpload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
             </div>
             <div className="flex justify-end mt-4 space-x-2">
-              <button
-                onClick={() => setShowImageUpload(false)}
-                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-              >
+              <button onClick={() => setShowImageUpload(false)} className="bg-gray-300 px-4 py-2 rounded">
                 Cancel
               </button>
-              <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+              <button onClick={handleUploadImage} className="bg-purple-600 text-white px-4 py-2 rounded disabled:opacity-50" disabled={!selectedFile}>
                 Upload
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Cropper Modal */}
+      {showCropper && imageToCrop && (
+        <ImageCropper
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setShowCropper(false)}
+        />
+      )}
     </div>
-  );
+  )
 }

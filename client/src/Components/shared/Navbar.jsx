@@ -16,17 +16,51 @@ import {
 } from '../ui/dropdown-menu'
 
 import default_user_image from '../../assets/Default_user_image.jpeg'
+import default_banner_image from '../../assets/default_cover_banner_image.webp'
 import { useAuth } from '../../context/authContext'
 import toast from 'react-hot-toast'
+import axios from "axios"
 
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [profileImage, setProfileImage] = useState(null)
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
 
-  const { token } = useAuth()
-  const location = useLocation()
+  const USER_ID = localStorage.getItem("userId")
+  const { token, PORT } = useAuth()
+  const location = useLocation();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await axios.get(`${PORT}/api/users/${USER_ID}`);
+        setUserData({
+          ...data,
+          avatar: data.avatar || default_user_image,
+          coverImage: data.coverImage || default_banner_image,
+          socialLinks: data.socialLinks || {
+            instagram: "",
+            twitter: "",
+            facebook: "",
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token && USER_ID) {
+      fetchUser();
+    } else {
+      setLoading(false); // prevent indefinite loading state
+    }
+  }, [token, PORT, USER_ID]);
+
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 100)
@@ -63,16 +97,14 @@ const AwesomeNavbar = () => {
     return (
       <Link
         to={to}
-        className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 ${
-          isActive ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
-        } group`}
+        className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 ${isActive ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
+          } group`}
       >
         {Icon && <Icon className="w-4 h-4" />}
         {label}
         <span
-          className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${
-            isActive ? 'w-full' : 'w-0 group-hover:w-full'
-          }`}
+          className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
+            }`}
         />
       </Link>
     )
@@ -90,7 +122,7 @@ const AwesomeNavbar = () => {
               </div>
               <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-[#077FBA] rounded-sm blur opacity-30 group-hover:opacity-60 transition" />
             </Link>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold font-montserrat bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
               Swap-Circle
             </span>
           </div>
@@ -105,17 +137,15 @@ const AwesomeNavbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 group ${
-                    isPathMatch(['/items', '/events']) ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
-                  }`}
+                  className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 group ${isPathMatch(['/items', '/events']) ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
+                    }`}
                 >
                   <LayoutListIcon className="w-4 h-4" />
                   Explore
                   <ChevronDown className="w-4 h-4" />
                   <span
-                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${
-                      isPathMatch(['/items', '/events']) ? 'w-full' : 'w-0 group-hover:w-full'
-                    }`}
+                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${isPathMatch(['/items', '/events']) ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`}
                   />
                 </Button>
               </DropdownMenuTrigger>
@@ -134,17 +164,15 @@ const AwesomeNavbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 group ${
-                    isPathMatch(['/about', '/contact']) ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
-                  }`}
+                  className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 group ${isPathMatch(['/about', '/contact']) ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
+                    }`}
                 >
                   <Info className="w-4 h-4" />
                   Info
                   <ChevronDown className="w-4 h-4" />
                   <span
-                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${
-                      isPathMatch(['/about', '/contact']) ? 'w-full' : 'w-0 group-hover:w-full'
-                    }`}
+                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${isPathMatch(['/about', '/contact']) ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`}
                   />
                 </Button>
               </DropdownMenuTrigger>
@@ -159,42 +187,47 @@ const AwesomeNavbar = () => {
             </DropdownMenu>
 
             {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <img
-                    src={profileImage || default_user_image}
-                    alt="Profile"
-                    className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${
-                      location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''
-                    }`}
-                    onError={(e) => {
-                      e.target.src = '/fallback.png'
-                    }}
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44 z-200">
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard">Dashboard</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-500">
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              userData ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <img
+                      src={userData.avatar ? `${PORT}${userData.avatar}` : default_user_image}
+                      alt="Profile"
+                      className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''
+                        }`}
+                      onError={(e) => {
+                        e.target.src = default_user_image;
+                      }}
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44 z-100">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
+              )
             ) : (
               <Link to="/login?mode=signin">
                 <Button
                   variant="default"
-                  className={`bg-gradient-to-r from-[#077FBA] to-orange-500 text-white ${location.pathname === '/login' && location.search.includes('signup') ? 'ring-2 ring-offset-2 ring-blue-400' : ''}`}
+                  className={`bg-gradient-to-r from-[#077FBA] to-orange-500 text-white ${location.pathname === '/login' && location.search.includes('signup') ? 'ring-2 ring-offset-2 ring-blue-400' : ''
+                    }`}
                 >
                   Sign up
                 </Button>
               </Link>
             )}
+
           </div>
 
           {/* Mobile toggle */}
