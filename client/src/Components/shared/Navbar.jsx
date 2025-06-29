@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Menu, X, Home, Info, Users, Mail, LayoutListIcon } from 'lucide-react'
+import {
+  Menu, X, Home, Info, Users, ChevronDown,
+  LayoutListIcon, ListTodo, CalendarClock,
+  UserRoundPen, BadgeInfoIcon,
+} from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import Main_logo from '../../assets/Main-logo(1).png'
 import { Button } from '../ui/button'
@@ -21,16 +25,15 @@ const AwesomeNavbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [profileImage, setProfileImage] = useState(null)
 
-  const { token, userId } = useAuth()
+  const { token } = useAuth()
   const location = useLocation()
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40)
+    const handleScroll = () => setScrolled(window.scrollY > 100)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Sync isLoggedIn state with token
   useEffect(() => {
     setIsLoggedIn(!!token)
   }, [token])
@@ -45,25 +48,38 @@ const AwesomeNavbar = () => {
     localStorage.removeItem('profileImage')
     localStorage.removeItem('userId')
 
-    toast.success('Logged Out successful! Redirecting...');
+    toast.success('Logged Out successful! Redirecting...')
     setTimeout(() => {
       setIsLoggedIn(false)
-      window.location.href = '/';
-    }, 1500);
+      window.location.href = '/'
+    }, 1500)
   }
 
-  const navItems = [
-    { name: 'Home', href: '/', icon: <Home className="w-4 h-4 mr-2" /> },
-    { name: 'About', href: '/about', icon: <Info className="w-4 h-4 mr-2" /> },
-    { name: 'Items', href: '/items', icon: <LayoutListIcon className="w-4 h-4 mr-2" /> },
-    { name: 'Groups', href: '/groups', icon: <Users className="w-4 h-4 mr-2" /> },
-    { name: 'Contact', href: '/contact', icon: <Mail className="w-4 h-4 mr-2" /> },
-  ]
+  const isPathMatch = (paths) =>
+    Array.isArray(paths) ? paths.includes(location.pathname) : location.pathname === paths
 
-  const isActive = (href) => location.pathname === href || location.hash === href
+  const AnimatedNavLink = ({ to, icon: Icon, label }) => {
+    const isActive = location.pathname === to
+    return (
+      <Link
+        to={to}
+        className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 ${
+          isActive ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
+        } group`}
+      >
+        {Icon && <Icon className="w-4 h-4" />}
+        {label}
+        <span
+          className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${
+            isActive ? 'w-full' : 'w-0 group-hover:w-full'
+          }`}
+        />
+      </Link>
+    )
+  }
 
   return (
-    <nav className={`fixed top-0 w-full z-20 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'}`}>
+    <nav className={`fixed top-0 w-full z-100 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'}`}>
       <div className="max-w-[95%] mx-auto py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -81,22 +97,66 @@ const AwesomeNavbar = () => {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`group flex relative text-sm font-medium px-2 py-1 cursor-pointer transition-colors duration-300 ${isActive(item.href) ? 'text-blue-600 font-semibold' : 'text-orange-600 hover:text-orange-800'}`}
-              >
-                {item.icon}
-                {item.name}
-                <span
-                  className={`absolute left-0 -bottom-0.5 h-[2px] w-full transition-all duration-500 transform scale-x-0 group-hover:scale-x-100 origin-left ${isActive(item.href)
-                    ? 'scale-x-100 bg-blue-500'
-                    : 'bg-orange-600 group-hover:bg-orange-800'
+            <AnimatedNavLink to="/" icon={Home} label="Home" />
+            <AnimatedNavLink to="/groups" icon={Users} label="Groups" />
+
+            {/* Explore Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 group ${
+                    isPathMatch(['/items', '/events']) ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
+                  }`}
+                >
+                  <LayoutListIcon className="w-4 h-4" />
+                  Explore
+                  <ChevronDown className="w-4 h-4" />
+                  <span
+                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${
+                      isPathMatch(['/items', '/events']) ? 'w-full' : 'w-0 group-hover:w-full'
                     }`}
-                />
-              </Link>
-            ))}
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="z-200">
+                <DropdownMenuItem asChild>
+                  <Link to="/items"><ListTodo className="mr-2" />Items</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/events"><CalendarClock className="mr-2" />Events</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Info Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className={`relative flex items-center gap-1 px-2 py-1 text-sm font-medium transition-colors duration-300 group ${
+                    isPathMatch(['/about', '/contact']) ? 'text-blue-600' : 'text-orange-600 hover:text-orange-800'
+                  }`}
+                >
+                  <Info className="w-4 h-4" />
+                  Info
+                  <ChevronDown className="w-4 h-4" />
+                  <span
+                    className={`absolute left-0 -bottom-[2px] h-[2px] bg-current transition-all duration-300 ${
+                      isPathMatch(['/about', '/contact']) ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}
+                  />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="z-200">
+                <DropdownMenuItem asChild>
+                  <Link to="/about"><BadgeInfoIcon className="mr-2" />About</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/contact"><UserRoundPen className="mr-2" />Contact</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {isLoggedIn ? (
               <DropdownMenu>
@@ -104,13 +164,15 @@ const AwesomeNavbar = () => {
                   <img
                     src={profileImage || default_user_image}
                     alt="Profile"
-                    className={`w-12 h-12 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''}`}
+                    className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${
+                      location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''
+                    }`}
                     onError={(e) => {
                       e.target.src = '/fallback.png'
                     }}
                   />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuContent align="end" className="w-44 z-200">
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard">Dashboard</Link>
                   </DropdownMenuItem>
@@ -124,24 +186,14 @@ const AwesomeNavbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link to="/login?mode=signin">
-                  <Button
-                    variant="ghost"
-                    className={`hover:text-orange-800 ${location.pathname === '/login' && location.search.includes('signin') ? 'text-blue-600 underline underline-offset-4' : 'text-orange-600'}`}
-                  >
-                    Sign in
-                  </Button>
-                </Link>
-                <Link to="/login?mode=signup">
-                  <Button
-                    variant="default"
-                    className={`bg-gradient-to-r from-[#077FBA] to-orange-500 text-white ${location.pathname === '/login' && location.search.includes('signup') ? 'ring-2 ring-offset-2 ring-blue-400' : ''}`}
-                  >
-                    Sign up
-                  </Button>
-                </Link>
-              </>
+              <Link to="/login?mode=signin">
+                <Button
+                  variant="default"
+                  className={`bg-gradient-to-r from-[#077FBA] to-orange-500 text-white ${location.pathname === '/login' && location.search.includes('signup') ? 'ring-2 ring-offset-2 ring-blue-400' : ''}`}
+                >
+                  Sign up
+                </Button>
+              </Link>
             )}
           </div>
 
@@ -156,39 +208,55 @@ const AwesomeNavbar = () => {
         {/* Mobile nav */}
         {isOpen && (
           <div className="mt-4 md:hidden space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`flex px-4 py-2 rounded-md text-sm font-medium transition ${isActive(item.href) ? 'text-orange-600 underline underline-offset-4 font-semibold' : 'text-muted-foreground hover:text-orange-600'}`}
-              >
-                {item.icon}
-                {item.name}
-              </Link>
-            ))}
+            <Link to="/" onClick={() => setIsOpen(false)} className="flex px-4 py-2 text-sm font-medium text-orange-600 hover:underline">
+              <Home className="w-4 h-4 mr-2" />
+              Home
+            </Link>
 
-            <div className="px-4 pt-3 flex items-center justify-between">
-              {!isLoggedIn ? (
-                <div className="flex gap-2">
-                  <Link to="/login?mode=signup">
-                    <Button className="bg-gradient-to-r from-[#077FBA] to-orange-500 text-white">
-                      Sign up
-                    </Button>
-                  </Link>
-                </div>
-              ) : (
+            <Link to="/groups" onClick={() => setIsOpen(false)} className="flex px-4 py-2 text-sm font-medium text-orange-600 hover:underline">
+              <Users className="w-4 h-4 mr-2" />
+              Groups
+            </Link>
+
+            <div className="px-4">
+              <p className="text-sm font-semibold text-muted-foreground">Explore</p>
+              <Link to="/items" onClick={() => setIsOpen(false)} className="block py-1 pl-6 text-sm text-orange-600 hover:underline">
+                Items
+              </Link>
+              <Link to="/events" onClick={() => setIsOpen(false)} className="block py-1 pl-6 text-sm text-orange-600 hover:underline">
+                Events
+              </Link>
+            </div>
+
+            <div className="px-4">
+              <p className="text-sm font-semibold text-muted-foreground">Info</p>
+              <Link to="/about" onClick={() => setIsOpen(false)} className="block py-1 pl-6 text-sm text-orange-600 hover:underline">
+                About
+              </Link>
+              <Link to="/contact" onClick={() => setIsOpen(false)} className="block py-1 pl-6 text-sm text-orange-600 hover:underline">
+                Contact
+              </Link>
+            </div>
+
+            <div className="px-4 pt-3">
+              {isLoggedIn ? (
                 <div className="space-y-1 text-sm mt-2">
-                  <Link to="/dashboard" className="block text-muted-foreground hover:text-primary">
+                  <Link to="/dashboard" onClick={() => setIsOpen(false)} className="block text-muted-foreground hover:text-primary">
                     Dashboard
                   </Link>
-                  <Link to="/profile" className="block text-muted-foreground hover:text-primary">
+                  <Link to="/profile" onClick={() => setIsOpen(false)} className="block text-muted-foreground hover:text-primary">
                     Profile
                   </Link>
                   <button onClick={handleLogout} className="text-red-500 hover:underline">
                     Sign out
                   </button>
                 </div>
+              ) : (
+                <Link to="/login?mode=signin">
+                  <Button className="bg-gradient-to-r from-[#077FBA] to-orange-500 text-white w-full mt-2">
+                    Sign up
+                  </Button>
+                </Link>
               )}
             </div>
           </div>

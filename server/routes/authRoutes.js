@@ -1,5 +1,5 @@
 import express from "express"
-import { loginByEmail, registerByEmail, googleByLogin } from "../controllers/authControllers.js";
+import { loginByEmail, registerByEmail, googleByLogin, forgotPassword, resetPassword } from "../controllers/authControllers.js";
 
 const authRouter = express.Router();
 
@@ -18,5 +18,10 @@ authRouter.post('/register',registerByEmail)
 // http://localhost:5005/api/auth/google
 authRouter.post('/google', googleByLogin)
 
+//http://localhost:5005/api/auth/forgot-password
+authRouter.post('/forgot-password', forgotPassword)
+
+//http://localhost:5005/api/auth/reset-password
+authRouter.post('/reset-password', resetPassword);
 
 export default authRouter;

@@ -9,6 +9,7 @@ import SwapCircleDashboard from '../Pages/Profile/Dashboard'
 import UserProfile from '../Pages/Profile/UserProfile'
 import Chat from '../Pages/Chat/Chat'
 import Shop from '../Pages/Items/Item'
+import Event from '../Pages/Events/event'
 
 const AppRoutes = () => (
   <Routes>
@@ -20,6 +21,7 @@ const AppRoutes = () => (
     <Route path="/dashboard" element={<SwapCircleDashboard />} />
     <Route path="/groups" element={<Chat />} />
     <Route path="/items" element={<Shop />} />
+    <Route path="/events" element={<Event />} />
   </Routes>
 )
 

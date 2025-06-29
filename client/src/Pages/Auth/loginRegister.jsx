@@ -4,9 +4,8 @@ import Main_logo from '../../assets/Main-logo(1).png';
 import { Link, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { toast, Toaster } from 'react-hot-toast';
-import { useAuth } from '../../context/authContext'; 
-
+import { toast } from 'react-hot-toast';
+import { useAuth } from '../../context/authContext';
 
 const AuthForms = () => {
     const [formValues, setFormValues] = useState({
@@ -14,19 +13,24 @@ const AuthForms = () => {
         email: '',
         password: '',
         confirmPassword: '',
+        token: '',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [mode, setMode] = useState("signin");
+    const [mode, setMode] = useState('signin');
 
     const { PORT } = useAuth();
-
     const location = useLocation();
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const modeParam = params.get('mode');
+        const tokenParam = params.get('token');
+
         setMode(modeParam || 'signin');
+        if (modeParam === 'reset-password' && tokenParam) {
+            setFormValues((prev) => ({ ...prev, token: tokenParam }));
+        }
     }, [location.search]);
 
     useEffect(() => {
@@ -38,10 +42,20 @@ const AuthForms = () => {
     const isForgotPassword = mode === 'forgot-password';
     const isResetPassword = mode === 'reset-password';
 
+        useEffect(() => {
+        if (isResetPassword) {
+            toast('This reset page may have opened in a new tab. If you were previously logged in, no worries — just set your new password here.', {
+                duration: 5000,
+                position: 'top-center',
+            });
+        }
+    }, [isResetPassword]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormValues((prev) => ({ ...prev, [name]: value }));
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -49,7 +63,7 @@ const AuthForms = () => {
         try {
             if (isRegister) {
                 if (formValues.password !== formValues.confirmPassword) {
-                    toast.error("Passwords do not match");
+                    toast.error('Passwords do not match');
                     return;
                 }
 
@@ -63,9 +77,7 @@ const AuthForms = () => {
                 localStorage.setItem('userId', res.data.userId);
 
                 toast.success('Registration successful! Redirecting...');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1500);
+                setTimeout(() => (window.location.href = '/'), 1500);
             }
 
             if (isLogin) {
@@ -78,9 +90,37 @@ const AuthForms = () => {
                 localStorage.setItem('userId', res.data.userId);
 
                 toast.success('Login successful! Redirecting...');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1500);
+                setTimeout(() => (window.location.href = '/'), 1500);
+            }
+
+            if (isForgotPassword) {
+                const res = await axios.post(`${PORT}/api/auth/forgot-password`, {
+                    email: formValues.email,
+                });
+
+                toast.success(res.data.message);
+            }
+
+            if (isResetPassword) {
+                if (!formValues.token) {
+                    toast.error('Missing token in the URL');
+                    return;
+                }
+
+                if (formValues.password !== formValues.confirmPassword) {
+                    toast.error('Passwords do not match');
+                    return;
+                }
+
+                const res = await axios.post(`${PORT}/api/auth/reset-password`, {
+                    email: formValues.email,
+                    password: formValues.password,
+                    confirmPassword: formValues.confirmPassword,
+                    token: formValues.token,
+                });
+
+                toast.success(res.data.message || 'Password reset successful! Redirecting...');
+                setTimeout(() => (window.location.href = '/login?mode=signin'), 1500);
             }
         } catch (err) {
             const errorMessage = err.response?.data?.message || 'Something went wrong';
@@ -88,8 +128,6 @@ const AuthForms = () => {
             console.error('Auth Error:', err);
         }
     };
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-700 via-white to-orange-700 flex items-center justify-center py-[100px]">
@@ -111,6 +149,12 @@ const AuthForms = () => {
                         {isResetPassword && 'Set a new password for your account'}
                     </p>
                 </div>
+                {isResetPassword && (
+                    <div className="mt-2 text-[12px] m-5 text-orange-600 bg-orange-100 rounded-lg px-4 py-2">
+                        This reset page may have opened in a new tab. If you were previously logged in, no worries — just set your new password here.
+                    </div>
+                )}
+
 
                 <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 backdrop-blur-sm">
                     {(isLogin || isRegister) && (
@@ -125,15 +169,12 @@ const AuthForms = () => {
                                             localStorage.setItem('token', res.data.token);
                                             localStorage.setItem('profileImage', res.data.user.picture);
                                             toast.success('Logged in with Google!');
-                                            setTimeout(() => {
-                                                window.location.href = '/';
-                                            }, 1500);
+                                            setTimeout(() => (window.location.href = '/'), 1500);
                                         } catch (err) {
                                             toast.error('Google login failed');
                                             console.error('Google Login failed:', err);
                                         }
                                     }}
-
                                 />
                             </div>
                             <div className="relative mb-6">

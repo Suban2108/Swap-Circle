@@ -9,10 +9,21 @@ import { Toaster } from 'react-hot-toast'
 const App = () => {
   return (
     <BrowserRouter>
-      <Navbar/>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Navbar />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            minWidth: '250px', // or maxWidth, width
+            padding: '5px',
+            fontSize: '14px',
+            border:'2px solid #4ade80',
+            marginBottom:"5px"
+          },
+        }}
+      />
       <AppRoutes />
-      <AwesomeFooter/>
+      <AwesomeFooter />
     </BrowserRouter>
   )
 }
