@@ -5,6 +5,7 @@ import {
   CheckCircle, Globe, Instagram, Twitter, Facebook,
   LayoutDashboard
 } from "lucide-react"
+import { Skeleton } from "../../Components/ui/skeleton"
 import SettingFeatures from "./UserComponent/Settings"
 import Achievements from "./UserComponent/Achievements"
 import Reviews from "./UserComponent/Reviews"
@@ -51,6 +52,82 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
     }, "image/jpeg")
   })
 }
+
+// Skeleton component for profile loading
+const ProfileSkeleton = () => (
+  <div className="min-h-screen bg-gray-50">
+    {/* Cover Image Skeleton */}
+    <div className="relative h-80 bg-gradient-to-r from-blue-600 to-blue-600">
+      <Skeleton className="w-full h-full opacity-50" />
+    </div>
+
+    {/* Profile Card Skeleton */}
+    <div className="max-w-4xl mx-auto px-4 -mt-20 relative z-10">
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="flex items-start space-x-6">
+          {/* Avatar Skeleton */}
+          <div className="relative">
+            <Skeleton className="w-32 h-32 rounded-full border-4 border-purple-500" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-4 h-4 text-white" />
+            </div>
+          </div>
+
+          {/* Info Skeleton */}
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-96" />
+            <div className="flex flex-wrap gap-4 mt-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <div className="flex space-x-3 mt-2">
+              <Skeleton className="w-5 h-5 rounded" />
+              <Skeleton className="w-5 h-5 rounded" />
+              <Skeleton className="w-5 h-5 rounded" />
+              <Skeleton className="w-5 h-5 rounded" />
+            </div>
+          </div>
+
+          {/* Buttons Skeleton */}
+          <div className="flex flex-col gap-2">
+            <Skeleton className="w-12 h-10 rounded" />
+            <Skeleton className="w-12 h-10 rounded" />
+            <Skeleton className="w-12 h-10 rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Tabs Skeleton */}
+    <div className="px-4 mt-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border p-1">
+        <nav className="flex space-x-1">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-10 w-24 rounded-lg" />
+          ))}
+        </nav>
+      </div>
+    </div>
+
+    {/* Content Skeleton */}
+    <div className="px-4 py-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <Skeleton className="h-6 w-32 mb-4" />
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)
 
 export default function UserProfile() {
   const [activeTab, setActiveTab] = useState("items")
@@ -174,7 +251,10 @@ export default function UserProfile() {
     }
   }
 
-  if (loading || !userData) return <div className="p-6 mt-20">Loading...</div>
+  // Show skeleton loading while data is being fetched
+  if (loading || !userData) {
+    return <ProfileSkeleton />
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

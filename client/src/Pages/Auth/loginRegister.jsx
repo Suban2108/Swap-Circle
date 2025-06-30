@@ -42,7 +42,7 @@ const AuthForms = () => {
     const isForgotPassword = mode === 'forgot-password';
     const isResetPassword = mode === 'reset-password';
 
-        useEffect(() => {
+    useEffect(() => {
         if (isResetPassword) {
             toast('This reset page may have opened in a new tab. If you were previously logged in, no worries — just set your new password here.', {
                 duration: 5000,
@@ -166,16 +166,23 @@ const AuthForms = () => {
                                             const res = await axios.post(`${PORT}/api/auth/google`, {
                                                 token: credentialResponse.credential,
                                             });
+
+                                            console.log("Google login response:", res.data); // ✅ log before redirect
+
                                             localStorage.setItem('token', res.data.token);
-                                            localStorage.setItem('profileImage', res.data.user.picture);
+                                            localStorage.setItem('email', res.data.user.email)
                                             toast.success('Logged in with Google!');
-                                            setTimeout(() => (window.location.href = '/'), 1500);
+
+                                            setTimeout(() => {
+                                                window.location.href = '/';
+                                            }, 1500);
                                         } catch (err) {
                                             toast.error('Google login failed');
                                             console.error('Google Login failed:', err);
                                         }
                                     }}
                                 />
+
                             </div>
                             <div className="relative mb-6">
                                 <div className="absolute inset-0 flex items-center">

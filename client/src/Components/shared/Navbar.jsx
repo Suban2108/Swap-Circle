@@ -32,7 +32,9 @@ const AwesomeNavbar = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
 
-  const USER_ID = localStorage.getItem("userId")
+  const USER_ID = localStorage.getItem("userId");
+
+
   const { token, PORT } = useAuth()
   const location = useLocation();
 
@@ -63,6 +65,29 @@ const AwesomeNavbar = () => {
       setLoading(false); // prevent indefinite loading state
     }
   }, [token, PORT, USER_ID]);
+
+  useEffect(() => {
+  const fetchUserIdFromEmail = async () => {
+    const email = localStorage.getItem("email");
+    if (!email) return;
+
+    try {
+      const response = await axios.get(`${PORT}/api/users/email/${encodeURIComponent(email)}`);
+      const user = response.data;
+      console.log(user);
+      
+
+      localStorage.setItem("userId", user._id); // Set the _id now
+      window.location.reload(); // Optionally reload to trigger re-fetch with _id
+    } catch (error) {
+      console.error("Failed to fetch user by email:", error);
+    }
+  };
+
+  if (!USER_ID && token) {
+    fetchUserIdFromEmail();
+  }
+}, [USER_ID, token, PORT]);
 
 
   useEffect(() => {
@@ -190,11 +215,10 @@ const AwesomeNavbar = () => {
             </DropdownMenu>
 
             {isLoggedIn ? (
-              userData ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <img
-                      src={userData.avatar ? `${PORT}${userData.avatar}` : default_user_image}
+                      src={userData ? `${PORT}${userData.avatar}` : default_user_image}
                       alt="Profile"
                       className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''
                         }`}
@@ -216,9 +240,6 @@ const AwesomeNavbar = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
-              )
             ) : (
               <Link to="/login?mode=signin">
                 <Button

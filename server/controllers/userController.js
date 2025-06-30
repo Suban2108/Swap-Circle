@@ -113,3 +113,20 @@ export const uploadProfileImage = async (req, res) => {
         res.status(500).json({ message: "Upload failed", error: err.message });
     }
 };
+
+export const getUserByEmail = async (req, res) => {
+    try {
+        const { email } = req.params;
+
+        const user = await User.findOne({ email })
+            .select('-password')
+            .populate('circleId', 'name')
+            .populate('joinedEvents', 'title date');
+
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch user by email', error: error.message });
+    }
+};
