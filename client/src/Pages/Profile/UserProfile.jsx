@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react"
 import {
   User, Mail, MapPin, Calendar, Star, Package, Award,
   Clock, Settings, Camera, Save, X, Edit, Share2, Upload,
-  CheckCircle, Globe, Instagram, Twitter, Facebook
+  CheckCircle, Globe, Instagram, Twitter, Facebook,
+  LayoutDashboard
 } from "lucide-react"
 import SettingFeatures from "./UserComponent/Settings"
 import Achievements from "./UserComponent/Achievements"
@@ -18,6 +19,7 @@ import default_user_image from "../../assets/Default_user_image.jpeg"
 import default_banner_image from "../../assets/default_cover_banner_image.webp"
 
 import cropImageHelper from '../../Components/shared/cropImageLayout.js'
+import { Link } from "react-router-dom"
 
 // Helper function to crop image
 const getCroppedImg = async (imageSrc, pixelCrop) => {
@@ -338,14 +340,12 @@ export default function UserProfile() {
                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
                   >
                     <Save className="w-4 h-4" />
-                    Save
                   </button>
                   <button
                     onClick={() => setIsEditing(false)}
                     className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 flex items-center gap-2"
                   >
                     <X className="w-4 h-4" />
-                    Cancel
                   </button>
                 </>
               ) : (
@@ -353,14 +353,18 @@ export default function UserProfile() {
                   <button
                     onClick={() => setIsEditing(true)}
                     className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 flex items-center gap-2"
+                    title="Edit profile"
                   >
                     <Edit className="w-4 h-4" />
-                    Edit Profile
                   </button>
-                  <button className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2">
+                  <button className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2" title="Share">
                     <Share2 className="w-4 h-4" />
-                    Share
                   </button>
+                  <Link to="/dashboard">
+                    <button className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500 flex items-center gap-2" title="Back to Dashboard">
+                      <LayoutDashboard className="w-4 h-4 text-white" />
+                    </button>
+                  </Link>
                 </>
               )}
             </div>

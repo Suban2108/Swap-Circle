@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
     Users,
     Package,
@@ -10,7 +10,7 @@ import {
     Menu,
     X,
 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import Main_logo from '../../assets/Main-logo(1).png'
 import Overview from "./DashComponent/Overview"
 import User from "./DashComponent/User"
@@ -18,10 +18,52 @@ import Items from "./DashComponent/Items"
 import Events from "./DashComponent/Events"
 import Analytics from "./DashComponent/Analytics"
 
+import default_user_image from '../../assets/Default_user_image.jpeg'
+import { useAuth } from '../../context/authContext'
+import toast from 'react-hot-toast'
+import axios from "axios"
+
+
 
 export default function SwapCircleDashboard() {
     const [activeTab, setActiveTab] = useState("overview")
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+
+    const USER_ID = localStorage.getItem("userId")
+    const { token, PORT } = useAuth()
+    const location = useLocation();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const { data } = await axios.get(`${PORT}/api/users/${USER_ID}`);
+                setUserData({
+                    ...data,
+                    avatar: data.avatar || default_user_image,
+                    coverImage: data.coverImage,
+                    socialLinks: data.socialLinks || {
+                        instagram: "",
+                        twitter: "",
+                        facebook: "",
+                    },
+                });
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (token && USER_ID) {
+            fetchUser();
+        } else {
+            setLoading(false); // prevent indefinite loading state
+        }
+    }, [token, PORT, USER_ID]);
+
 
     const navigationItems = [
         { id: "overview", label: "Overview", icon: <BarChart3 className="w-5 h-5" /> },
@@ -65,7 +107,7 @@ export default function SwapCircleDashboard() {
 
             {/* Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 w-64 mt-20 bg-white shadow-xl transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed inset-y-0 left-0 w-64 mt-17 bg-white shadow-xl transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
                     } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
             >
                 <div className="flex items-center justify-between h-16 px-6 border-b border-orange-500">
@@ -109,7 +151,16 @@ export default function SwapCircleDashboard() {
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-                            <Link to='/profile'><span className="text-white font-semibold text-sm">AD</span></Link>
+                            <Link to='/profile'>
+                                <img
+                                    src={userData ? `${PORT}${userData.avatar}` : default_user_image}
+                                    alt="Profile"
+                                    className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''
+                                        }`}
+                                    onError={(e) => {
+                                        e.target.src = default_user_image;
+                                    }}
+                                /></Link>
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-800 truncate">Admin User</p>
@@ -123,7 +174,7 @@ export default function SwapCircleDashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="w-full mt-20">
+            <div className="w-full mt-13">
                 {/* Top Header */}
                 <header className="bg-white shadow-sm ">
                     <div className="flex items-center justify-between h-20 px-6 py-5">
@@ -142,8 +193,16 @@ export default function SwapCircleDashboard() {
                                 <Bell className="w-6 h-6" />
                                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                             </button>
-                            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-                                <Link to='/profile'> <span className="text-white font-semibold text-sm">AD</span></Link>
+                            <div className="w-11 h-11 rounded-full flex items-center justify-center">
+                                <Link to='/profile'><img
+                                    src={userData ? `${PORT}${userData.avatar}` : default_user_image}
+                                    alt="Profile"
+                                    className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/profile') ? 'ring-2 ring-red-500' : ''
+                                        }`}
+                                    onError={(e) => {
+                                        e.target.src = default_user_image;
+                                    }}
+                                /></Link>
                             </div>
                         </div>
                     </div>

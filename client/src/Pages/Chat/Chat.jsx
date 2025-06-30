@@ -64,7 +64,7 @@ const Chat = () => {
   }
 
   return (
-    <div className="h-screen md:h-[700px] md:mt-20 mt-16 flex bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950 overflow-hidden">
+    <div className="h-screen md:h-[700px] md:mt-16 mt-16 flex bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950 overflow-hidden">
 
       {/* Mobile Sidebar Toggle */}
       <ChatSidebarToggle

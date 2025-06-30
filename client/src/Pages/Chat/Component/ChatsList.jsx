@@ -21,7 +21,7 @@ const ChatListSidebar = ({
       {/* Mobile Overlay */}
       {isMobileListOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 mt-20 z-40 md:hidden"
           onClick={onCloseMobileList}
         />
       )}
@@ -35,7 +35,7 @@ const ChatListSidebar = ({
           dark:from-blue-950 dark:to-orange-900 
           border-r border-blue-200 dark:border-blue-800
           transform transition-transform duration-300 ease-in-out
-          ${isMobileListOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          ${isMobileListOpen ? "translate-x-0 mt-15" : "-translate-x-full md:translate-x-0"}
         `}
       >
         {/* Header */}

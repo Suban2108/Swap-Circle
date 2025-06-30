@@ -3,6 +3,9 @@ import {
   Menu, X, Home, Info, Users, ChevronDown,
   LayoutListIcon, ListTodo, CalendarClock,
   UserRoundPen, BadgeInfoIcon,
+  LayoutDashboard, CircleUser,
+  LogOut,
+  LogOutIcon
 } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import Main_logo from '../../assets/Main-logo(1).png'
@@ -200,16 +203,16 @@ const AwesomeNavbar = () => {
                       }}
                     />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44 z-100">
+                  <DropdownMenuContent align="end" className="w-30 z-100">
                     <DropdownMenuItem asChild>
-                      <Link to="/dashboard">Dashboard</Link>
+                      <Link to="/dashboard"><LayoutDashboard/> Dashboard</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/profile">Profile</Link>
+                      <Link to="/profile"><CircleUser/> Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-red-500">
-                      Sign out
+                      <LogOutIcon className='text-red-500'/> Sign out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
