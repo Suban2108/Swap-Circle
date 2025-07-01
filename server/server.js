@@ -12,6 +12,9 @@ import requestsRouter from "./routes/requestRoutes.js"
 import chatRouter from "./routes/chatRoutes.js"
 import karmaRouter from "./routes/karmaRoutes.js"
 import eventRouter from "./routes/eventRoutes.js"
+import conversationRouter from "./routes/conversationRoutes.js"
+import messageRouter from "./routes/messageRoutes.js"
+import errorHandler from "./middleware/errorHandlerMiddleware.js"
 
 import 'dotenv/config'
 
@@ -46,8 +49,13 @@ connectDB();
   app.use('/api/chat',chatRouter);
   app.use('/api/karma',karmaRouter);
   app.use('/api/events',eventRouter);
+  app.use('/api/conversations', conversationRouter)
+  app.use('/api/messages', messageRouter)
   // app.use('/api/stats',statsRouter);
   // app.use('/api/admin',adminRouter);
+
+// Error handler middleware (should be after all routes)
+app.use(errorHandler)
 
 // Basic route
 app.get('/', (req, res) => {

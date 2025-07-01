@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 const itemSchema = new mongoose.Schema({
   ownerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: true
   },
   title: {

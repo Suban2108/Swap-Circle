@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const requestSchema = new mongoose.Schema({
     requestedById: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: 'User',
         required: true // Who is making the request
     },
     description: {

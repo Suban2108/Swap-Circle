@@ -9,7 +9,7 @@ const offerSchema = new mongoose.Schema({
     },
     offeredById: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: 'User',
         required: true // Who is making the offer
     },
     offerItemId: {

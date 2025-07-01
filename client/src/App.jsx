@@ -17,7 +17,6 @@ const App = () => {
             minWidth: '250px', // or maxWidth, width
             padding: '5px',
             fontSize: '14px',
-            border:'2px solid #4ade80',
             marginBottom:"5px"
           },
         }}

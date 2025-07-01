@@ -13,11 +13,11 @@ const circleSchema = new mongoose.Schema({
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user' // Who initiated the circle
+        ref: 'User' // Who initiated the circle
     },
     members: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user' // Array of users in this circle
+        ref: 'User' // Array of users in this circle
     }]
 }, { minimize: false });
 
