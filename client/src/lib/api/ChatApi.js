@@ -18,7 +18,7 @@ class ChatAPI {
       const response = await axios.post(
         `${API_BASE_URL}/api/conversations/direct`,
         { userId1, userId2 },
-        this.getAuthHeaders()
+        this.getAuthHeaders(),
       )
       return response.data
     } catch (error) {
@@ -29,11 +29,7 @@ class ChatAPI {
 
   async getOrCreateGroupConversation(groupId) {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/conversations/group`,
-        { groupId },
-        this.getAuthHeaders()
-      )
+      const response = await axios.post(`${API_BASE_URL}/api/conversations/group`, { groupId }, this.getAuthHeaders())
       return response.data
     } catch (error) {
       console.error("Error getting/creating group conversation:", error)
@@ -46,8 +42,12 @@ class ChatAPI {
       const params = type ? `?type=${type}` : ""
       const response = await axios.get(
         `${API_BASE_URL}/api/conversations/user/${userId}${params}`,
-        this.getAuthHeaders()
+        this.getAuthHeaders(),
       )
+
+      // Debug log to see what we're getting
+      console.log("Conversations response:", response.data)
+
       return response.data
     } catch (error) {
       console.error("Error fetching user conversations:", error)
@@ -57,11 +57,7 @@ class ChatAPI {
 
   async sendMessage(messageData) {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/messages/send`,
-        messageData,
-        this.getAuthHeaders()
-      )
+      const response = await axios.post(`${API_BASE_URL}/api/messages/send`, messageData, this.getAuthHeaders())
       return response.data
     } catch (error) {
       console.error("Error sending message:", error)
@@ -73,7 +69,7 @@ class ChatAPI {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/api/messages/conversation/${conversationId}?page=${page}&limit=${limit}`,
-        this.getAuthHeaders()
+        this.getAuthHeaders(),
       )
       return response.data
     } catch (error) {
@@ -87,7 +83,7 @@ class ChatAPI {
       const response = await axios.post(
         `${API_BASE_URL}/api/messages/mark-read`,
         { conversationId, userId },
-        this.getAuthHeaders()
+        this.getAuthHeaders(),
       )
       return response.data
     } catch (error) {
@@ -98,13 +94,10 @@ class ChatAPI {
 
   async deleteConversation(conversationId, userId) {
     try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/api/conversations/${conversationId}`,
-        {
-          ...this.getAuthHeaders(),
-          data: { userId },
-        }
-      )
+      const response = await axios.delete(`${API_BASE_URL}/api/conversations/${conversationId}`, {
+        ...this.getAuthHeaders(),
+        data: { userId },
+      })
       return response.data
     } catch (error) {
       console.error("Error deleting conversation:", error)
@@ -114,13 +107,10 @@ class ChatAPI {
 
   async deleteMessage(messageId, userId) {
     try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/api/messages/${messageId}`,
-        {
-          ...this.getAuthHeaders(),
-          data: { userId },
-        }
-      )
+      const response = await axios.delete(`${API_BASE_URL}/api/messages/${messageId}`, {
+        ...this.getAuthHeaders(),
+        data: { userId },
+      })
       return response.data
     } catch (error) {
       console.error("Error deleting message:", error)
@@ -130,11 +120,7 @@ class ChatAPI {
 
   async createCircle(circleData) {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/circles/create`,
-        circleData,
-        this.getAuthHeaders()
-      )
+      const response = await axios.post(`${API_BASE_URL}/api/circles/create`, circleData, this.getAuthHeaders())
       return response.data
     } catch (error) {
       console.error("Error creating circle:", error)
@@ -144,11 +130,7 @@ class ChatAPI {
 
   async joinCircle(joinData) {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/circles/join`,
-        joinData,
-        this.getAuthHeaders()
-      )
+      const response = await axios.post(`${API_BASE_URL}/api/circles/join`, joinData, this.getAuthHeaders())
       return response.data
     } catch (error) {
       console.error("Error joining circle:", error)
@@ -158,10 +140,11 @@ class ChatAPI {
 
   async getUserGroups(userId) {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/circles/user-groups/${userId}`,
-        this.getAuthHeaders()
-      )
+      const response = await axios.get(`${API_BASE_URL}/api/circles/user-groups/${userId}`, this.getAuthHeaders())
+
+      // Debug log to see group data
+      console.log("User groups response:", response.data)
+
       return response.data
     } catch (error) {
       console.error("Error fetching user groups:", error)
@@ -174,10 +157,7 @@ class ChatAPI {
       console.log("ChatAPI: Getting members for circle:", circleId)
       console.log("ChatAPI: Making request to:", `${API_BASE_URL}/api/circles/${circleId}/members`)
 
-      const response = await axios.get(
-        `${API_BASE_URL}/api/circles/${circleId}/members`,
-        this.getAuthHeaders()
-      )
+      const response = await axios.get(`${API_BASE_URL}/api/circles/${circleId}/members`, this.getAuthHeaders())
 
       console.log("ChatAPI: Response received:", response.data)
       return response.data
@@ -192,13 +172,52 @@ class ChatAPI {
 
   async getCircleDetails(circleId) {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/circles/${circleId}`,
-        this.getAuthHeaders()
-      )
+      console.log("ChatAPI: Getting circle details for:", circleId)
+
+      const response = await axios.get(`${API_BASE_URL}/api/circles/${circleId}`, this.getAuthHeaders())
+
+      console.log("ChatAPI: Circle details response:", response.data)
       return response.data
     } catch (error) {
       console.error("Error fetching circle details:", error)
+      throw error
+    }
+  }
+
+  async updateCircle(groupId, { name, avatar, userId }) {
+    try {
+      console.log("ChatAPI: Updating circle:", groupId, { name, hasAvatar: !!avatar, userId })
+
+      const formData = new FormData()
+      if (name) formData.append("name", name)
+      if (userId) formData.append("userId", userId)
+      if (avatar) formData.append("avatar", avatar)
+
+      const token = localStorage.getItem("token")
+      const response = await axios.put(`${API_BASE_URL}/api/circles/${groupId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      console.log("ChatAPI: Update response:", response.data)
+      return response.data
+    } catch (error) {
+      console.error("Error updating circle:", error)
+      throw error
+    }
+  }
+
+  // Add method to refresh conversation data
+  async refreshConversationData(conversationId) {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/conversations/${conversationId}`, this.getAuthHeaders())
+
+      console.log("Refreshed conversation data:", response.data)
+      return response.data
+    } catch (error) {
+      console.error("Error refreshing conversation data:", error)
       throw error
     }
   }

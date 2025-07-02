@@ -1,5 +1,7 @@
 import messageModel from "../models/messageModel.js"
 import conversationModel from "../models/conversationModel.js"
+import fs from "fs"
+import path from "path"
 
 // Send message
 export const sendMessage = async (req, res) => {
@@ -137,22 +139,62 @@ export const deleteMessage = async (req, res) => {
       return res.status(403).json({ error: "Not authorized to delete this message" })
     }
 
+    // Delete associated file if it exists
+    if (
+      message.fileUrl &&
+      (message.messageType === "image" ||
+        message.messageType === "video" ||
+        message.messageType === "audio" ||
+        message.messageType === "file")
+    ) {
+      try {
+        // The fileUrl is stored as "/uploads/chat/filename.ext"
+        // We need to construct the full file path correctly
+        let filePath
+
+        if (message.fileUrl.startsWith("/")) {
+          // Remove the leading slash and join with process.cwd()
+          filePath = path.join(process.cwd(), message.fileUrl.substring(1))
+        } else {
+          // If no leading slash, join directly
+          filePath = path.join(process.cwd(), message.fileUrl)
+        }
+
+
+        // Check if file exists before attempting to delete
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        } else {
+          console.log(`⚠️ File not found, skipping deletion: ${filePath}`)
+        }
+      } catch (fileError) {
+        console.error("❌ Error deleting file:", fileError)
+        console.error("File path attempted:", message.fileUrl)
+        // Continue with message deletion even if file deletion fails
+      }
+    }
+
+    // Delete the message from database
     await messageModel.findByIdAndDelete(messageId)
 
     // Update conversation's last message if this was the last message
     const conversation = await conversationModel.findById(message.conversationId)
+
     if (
       conversation &&
       conversation.lastMessage &&
       conversation.lastMessage.timestamp.getTime() === message.timestamp.getTime()
     ) {
       // Find the new last message
-      const lastMessage = await messageModel.findOne({ conversationId: message.conversationId }).sort({ timestamp: -1 })
+      const lastMessage = await messageModel
+        .findOne({ conversationId: message.conversationId })
+        .sort({ timestamp: -1 })
+        .populate("senderId", "name")
 
       if (lastMessage) {
         conversation.lastMessage = {
-          content: lastMessage.content,
-          senderId: lastMessage.senderId,
+          content: lastMessage.content || `[${lastMessage.messageType} file]`,
+          senderId: lastMessage.senderId._id,
           timestamp: lastMessage.timestamp,
         }
       } else {
@@ -162,9 +204,75 @@ export const deleteMessage = async (req, res) => {
       await conversation.save()
     }
 
-    res.status(200).json({ message: "Message deleted successfully" })
+    res.status(200).json({
+      message: "Message deleted successfully",
+      deletedMessageId: messageId,
+    })
   } catch (error) {
     console.error("Error deleting message:", error)
     res.status(500).json({ error: "Failed to delete message" })
+  }
+}
+
+
+export const uploadMessageFile = async (req, res) => {
+  try {
+    const { senderId, conversationId, content } = req.body
+    const file = req.file
+
+
+    if (!file || !senderId || !conversationId) {
+      return res.status(400).json({ error: "Missing required fields or file." })
+    }
+
+    // Check if conversation exists
+    const conversation = await conversationModel.findById(conversationId)
+
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation not found." })
+    }
+
+    // Determine file type for messageType
+    const mimeType = file.mimetype
+    let messageType = "file"
+
+    if (mimeType.startsWith("image/")) messageType = "image"
+    else if (mimeType.startsWith("audio/")) messageType = "audio"
+    else if (mimeType.startsWith("video/")) messageType = "video"
+
+    // Store the fileUrl with the correct path format
+    const fileUrl = `/uploads/chat/${file.filename}`
+
+
+    const newMessage = new messageModel({
+      senderId,
+      conversationId,
+      content: typeof content === "string" ? content : "",
+      messageType,
+      fileUrl,
+      fileName: file.originalname,
+      fileSize: file.size,
+      timestamp: new Date(),
+    })
+
+    const savedMessage = await newMessage.save()
+    await savedMessage.populate("senderId", "name avatar")
+
+    // Update last message in conversation
+    conversation.lastMessage = {
+      content: savedMessage.content || `[${messageType} file]`,
+      senderId,
+      timestamp: savedMessage.timestamp,
+    }
+    conversation.updatedAt = new Date()
+    await conversation.save()
+
+    res.status(201).json({
+      message: "File uploaded and message sent.",
+      savedMessage,
+    })
+  } catch (error) {
+    console.error("File upload error:", error)
+    res.status(500).json({ error: "Please write some message to send" })
   }
 }

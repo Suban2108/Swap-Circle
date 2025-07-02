@@ -6,12 +6,16 @@ import ChatList from "./ChatsList"
 import ChatMainWindow from "./ChatMainWindow"
 import { useChat } from "../../../hooks/UserChat.js"
 import { chatAPI } from "../../../lib/api/ChatApi.js"
+import axios from "axios"
+import { useAuth } from "../../../context/authContext"
+import toast from "react-hot-toast"
 
 const ChatContainer = ({ userId, apiUrl, token }) => {
   const [mode, setMode] = useState("groups")
   const [selectedConversation, setSelectedConversation] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobileListOpen, setIsMobileListOpen] = useState(false)
+  const { PORT } = useAuth()
 
   const {
     messages,
@@ -25,6 +29,7 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     createGroup,
     joinGroup,
     createDirectConversation,
+    refreshConversations,
   } = useChat(userId)
 
   const handleShowMobileMenu = () => {
@@ -51,10 +56,9 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
   }
 
   const handleSelectConversation = async (conversation) => {
+    console.log("Selected conversation:", conversation)
     setSelectedConversation(conversation)
-
     await fetchConversationMessages(conversation._id)
-
     if (conversation.unreadCount && conversation.unreadCount > 0) {
       await markAsRead(conversation._id)
     }
@@ -94,7 +98,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
   const handleStartDirectChat = async (otherUserId, userName) => {
     try {
       const conversation = await createDirectConversation(otherUserId)
-
       if (conversation) {
         setMode("individuals")
         await handleSelectConversation(conversation)
@@ -108,7 +111,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
 
   const handleGetGroupMembers = async (groupId) => {
     try {
-      // Make sure we're using the actual group/circle ID, not the conversation ID
       return await chatAPI.getCircleMembers(groupId)
     } catch (error) {
       console.error("Failed to get group members:", error)
@@ -116,10 +118,21 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     }
   }
 
+  const handleGetCircleDetails = async (groupId) => {
+    try {
+      return await chatAPI.getCircleDetails(groupId)
+    } catch (error) {
+      console.error("Failed to get group details:", error)
+      return []
+    }
+  }
+
   const transformConversationForUI = (conversation) => {
     let name = ""
     let avatar = ""
-    let groupId = null // Add this to track the actual group ID
+    let groupId = null
+
+    console.log("Transforming conversation:", conversation)
 
     if (conversation.type === "direct") {
       const otherParticipant = conversation.participants?.find((p) => p._id !== userId)
@@ -127,13 +140,13 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
       avatar = otherParticipant?.avatar || ""
     } else {
       name = conversation.groupId?.name || "Unknown Group"
-      avatar = ""
-      groupId = conversation.groupId?._id || conversation.groupId // Store the actual group ID
+      avatar = conversation.groupId?.avatar || ""
+      groupId = conversation.groupId?._id || conversation.groupId
     }
 
-    return {
+    const transformedConversation = {
       _id: conversation._id,
-      groupId, // Add the actual group ID for group conversations
+      groupId,
       name,
       avatar,
       lastMessage: conversation.lastMessage?.content || "",
@@ -143,6 +156,134 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
       type: conversation.type,
       inviteCode: conversation.groupId?.inviteCode,
       createdBy: conversation.groupId?.createdBy,
+    }
+
+    console.log("Transformed conversation:", transformedConversation)
+    return transformedConversation
+  }
+
+  // Updated file upload handler to match your API endpoint
+  const handleSendFile = async (file, caption = "") => {
+    if (!selectedConversation || !file) {
+      console.error("Missing conversation or file")
+      return
+    }
+
+    try {
+      console.log("Uploading file:", {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        conversationId: selectedConversation._id,
+        senderId: userId,
+        content: caption,
+      })
+
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("senderId", userId)
+      formData.append("conversationId", selectedConversation._id)
+
+      if (caption && caption.trim()) {
+        formData.append("content", caption.trim())
+      }
+
+      // Log FormData contents for debugging
+      for (const [key, value] of formData.entries()) {
+        console.log(`FormData ${key}:`, value)
+      }
+
+      const response = await axios.post(`${PORT}/api/messages/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          // Add authorization header if needed
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        timeout: 30000, // 30 second timeout for file uploads
+      })
+
+      console.log("File upload response:", response.data)
+
+      if (response.status === 201) {
+        // Refresh messages to show the new file message
+        await fetchConversationMessages(selectedConversation._id)
+      } else {
+        throw new Error(`Upload failed with status: ${response.status}`)
+      }
+    } catch (error) {
+      console.error("Error sending file:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+      })
+
+      const errorMessage = error.response?.data?.error
+      toast.error(errorMessage)
+      throw error
+    }
+  }
+
+  // Update group info handler
+  const handleUpdateGroupInfo = async (groupId, updateData) => {
+    try {
+      console.log("ChatContainer: Updating group info:", groupId, updateData)
+
+      const result = await chatAPI.updateCircle(groupId, { ...updateData, userId })
+
+      console.log("ChatContainer: Update result:", result)
+
+      // Refresh conversations to get updated data
+      if (refreshConversations) {
+        await refreshConversations()
+      }
+
+      return result
+    } catch (error) {
+      console.error("Failed to update group info:", error)
+      throw error
+    }
+  }
+
+  // Add refresh chat handler
+  const handleRefreshChat = async (conversationId) => {
+    try {
+      console.log("ChatContainer: Refreshing chat:", conversationId)
+
+      // If we have a refresh function from useChat hook, use it
+      if (refreshConversations) {
+        await refreshConversations()
+      }
+
+      // Find and update the selected conversation
+      const updatedGroupConversations = groupConversations
+      const updatedDirectConversations = directConversations
+
+      // Find the conversation in either list
+      const updatedConversation =
+        updatedGroupConversations.find((c) => c._id === conversationId) ||
+        updatedDirectConversations.find((c) => c._id === conversationId)
+
+      if (updatedConversation && selectedConversation?._id === conversationId) {
+        console.log("ChatContainer: Updating selected conversation")
+        setSelectedConversation(updatedConversation)
+      }
+    } catch (error) {
+      console.error("Error refreshing chat:", error)
+    }
+  }
+
+  // Add this function after handleRefreshChat
+  const handleDeleteMessage = (messageId) => {
+    console.log("ChatContainer: Deleting message from UI:", messageId)
+
+    // Remove the message from the messages array in your useChat hook
+    // This depends on your useChat implementation
+    // You might need to add a deleteMessage function to your useChat hook
+
+    // For now, refresh the conversation messages
+    if (selectedConversation) {
+      fetchConversationMessages(selectedConversation._id)
     }
   }
 
@@ -181,13 +322,13 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
 
       <ChatList
         list={currentList}
+        selectedChat={selectedConversation ? transformConversationForUI(selectedConversation) : null}
         selectedId={selectedConversation?._id}
         onSelect={(item) => {
           const conversation =
             mode === "groups"
               ? groupConversations.find((c) => c._id === item._id)
               : directConversations.find((c) => c._id === item._id)
-
           if (conversation) {
             handleSelectConversation(conversation)
           }
@@ -199,6 +340,7 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
         onCreateGroup={handleCreateGroup}
         onJoinGroup={handleJoinGroup}
         loading={loading}
+        onShowGroupInfo={handleGetCircleDetails}
       />
 
       <div className="flex-1 min-w-0">
@@ -206,11 +348,16 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
           selectedChat={selectedConversation ? transformConversationForUI(selectedConversation) : null}
           messages={messages}
           onSendMessage={handleSendMessage}
+          onSendFile={handleSendFile}
           onShowMobileMenu={handleShowMobileMenu}
           onShowMobileList={handleShowMobileList}
           onStartDirectChat={handleStartDirectChat}
           onGetGroupMembers={handleGetGroupMembers}
+          onUpdateGroupInfo={handleUpdateGroupInfo}
+          onRefreshChat={handleRefreshChat}
+          onDeleteMessage={handleDeleteMessage} // Add this line
           loading={loading}
+          onShowGroupDetails={handleGetCircleDetails}
           currentUserId={userId}
         />
       </div>

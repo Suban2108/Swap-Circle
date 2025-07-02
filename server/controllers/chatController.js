@@ -157,3 +157,44 @@ export const markMessagesAsRead = async (req, res) => {
     res.status(500).json({ error: "Failed to mark messages as read" })
   }
 }
+
+
+export const uploadChatFile = async (req, res) => {
+  try {
+    const { senderId, receiverId, groupId, caption } = req.body;
+    const file = req.file;
+
+    if (!file || !senderId || (!receiverId && !groupId)) {
+      return res.status(400).json({ error: "Missing required fields or file." });
+    }
+
+    const fileUrl = `/uploads/chat/${file.filename}`;
+
+    const newMessage = new chatModel({
+      senderId,
+      receiverId: receiverId || null,
+      groupId: groupId || null,
+      content: caption || "", // Optional caption
+      timestamp: new Date(),
+      read: false,
+      file: {
+        name: file.originalname,
+        url: fileUrl,
+        type: file.mimetype,
+        size: file.size,
+      },
+    });
+
+    const savedMessage = await newMessage.save();
+    await savedMessage.populate("senderId", "name avatar");
+
+    res.status(201).json({
+      message: "File uploaded and message sent.",
+      fileUrl,
+      savedMessage,
+    });
+  } catch (error) {
+    console.error("File upload error:", error);
+    res.status(500).json({ error: "Failed to upload file and create message." });
+  }
+};

@@ -1,6 +1,14 @@
 import circleModel from "../models/circleModel.js"
 import chatModel from "../models/chatModel.js"
 import userModel from "../models/userModel.js" // Add this import
+import path from "path"
+import fs from "fs"
+import { fileURLToPath } from "url"
+
+// Setup __dirname for ES Modules
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 
 // Create circle
 export const createCircle = async (req, res) => {
@@ -186,5 +194,65 @@ export const leaveCircle = async (req, res) => {
   } catch (error) {
     console.error("Error leaving circle:", error)
     res.status(500).json({ error: "Failed to leave circle" })
+  }
+}
+
+
+export const updateCircle = async (req, res) => {
+  try {
+    const { groupId } = req.params
+    const { name } = req.body
+    const avatarFile = req.file
+    // const userId = req.user._id // Uncomment if using auth
+
+    const group = await circleModel.findById(groupId)
+    if (!group) {
+      return res.status(404).json({ error: "Group not found" })
+    }
+
+    // Optional authorization check
+    // if (group.createdBy.toString() !== userId) {
+    //   return res.status(403).json({ error: "Unauthorized" })
+    // }
+
+    const updateData = {}
+
+    // Update group name if provided
+    if (name && name.trim()) {
+      updateData.name = name.trim()
+    }
+
+    // Handle avatar replacement
+    if (avatarFile) {
+      // Delete old avatar if it exists
+      if (group.avatar) {
+        const oldAvatarPath = path.join(process.cwd(), group.avatar.replace(/^\/+/, ""))
+        try {
+          await fs.promises.unlink(oldAvatarPath)
+          // console.log("Old avatar deleted:", oldAvatarPath)
+        } catch (err) {
+          if (err.code !== "ENOENT") {
+            console.error("Error deleting old avatar:", err)
+          } else {
+            console.warn("Old avatar already deleted or missing:", oldAvatarPath)
+          }
+        }
+      }
+
+      // Set new avatar path
+      updateData.avatar = `/uploads/${avatarFile.filename}`
+    }
+
+    // Save updates
+    const updatedGroup = await circleModel.findByIdAndUpdate(groupId, updateData, { new: true })
+
+    res.status(200).json({
+      success: true,
+      message: "Group updated successfully",
+      group: updatedGroup,
+    })
+  } catch (error) {
+    console.error("Group update error:", error)
+    res.status(500).json({ error: "Failed to update group" })
   }
 }

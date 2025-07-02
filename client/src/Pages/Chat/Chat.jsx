@@ -1,3 +1,5 @@
+"use client"
+
 import React,{ useEffect, useState } from "react"
 import ChatContainer from "./Component/chatContainer"
 import { useAuth } from "../../context/authContext"
@@ -6,21 +8,24 @@ export default function ChatPage() {
   const [userId, setUserId] = useState("")
   const [token, setToken] = useState("")
   const [apiUrl, setApiUrl] = useState("")
-  const { PORT } = useAuth() 
+  const { PORT } = useAuth()
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId")
     const storedToken = localStorage.getItem("token")
     const storedApiUrl = PORT
 
+    console.log("ChatPage: Auth data:", { storedUserId, storedToken, storedApiUrl })
+
     if (storedUserId && storedToken) {
       setUserId(storedUserId)
       setToken(storedToken)
       setApiUrl(storedApiUrl)
     } else {
+      console.log("ChatPage: Missing auth data, redirecting to login")
       window.location.href = "/login"
     }
-  }, [])
+  }, [PORT])
 
   if (!userId || !token) {
     return (

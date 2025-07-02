@@ -5,7 +5,9 @@ import {
   getGroupMessages,
   getUserChatContacts,
   markMessagesAsRead,
+  uploadChatFile
 } from "../controllers/chatController.js"
+import upload from '../middleware/uploadChatImages.js'
 
 const chatRouter = express.Router()
 
@@ -23,5 +25,8 @@ chatRouter.get("/contacts/:userId", getUserChatContacts)
 
 // POST /api/chat/mark-read
 chatRouter.post("/mark-read", markMessagesAsRead)
+
+
+chatRouter.post("/upload", upload.single("file"), uploadChatFile);
 
 export default chatRouter

@@ -4,7 +4,9 @@ import {
   getConversationMessages,
   markMessagesAsRead,
   deleteMessage,
+  uploadMessageFile
 } from "../controllers/messageController.js"
+import upload from '../middleware/uploadChatImages.js'
 
 const messageRouter = express.Router()
 
@@ -19,5 +21,8 @@ messageRouter.post("/mark-read", markMessagesAsRead)
 
 // DELETE /api/messages/:messageId
 messageRouter.delete("/:messageId", deleteMessage)
+
+// /api/messages/upload
+messageRouter.post("/upload", upload.single("file"), uploadMessageFile)
 
 export default messageRouter

@@ -23,6 +23,12 @@ const chatSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  file: {
+    name: String,
+    url: String,
+    type: String,
+    size: Number,
+  },
   timestamp: {
     type: Date,
     default: Date.now

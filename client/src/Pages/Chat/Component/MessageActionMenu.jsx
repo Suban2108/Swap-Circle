@@ -1,7 +1,11 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
-import { MessageCircle, MoreVertical, Reply, Copy, Trash2 } from "lucide-react"
+import React, { useState } from "react"
+import { MoreVertical, Copy, MessageSquare, Trash2 } from "lucide-react"
+import toast from "react-hot-toast"
+import axios from "axios"
+import { useAuth } from "../../../context/authContext"
+import ConfirmDialog from "../../../Components/shared/ConfirmDialog"
 
 const MessageActionsMenu = ({
   messageId,
@@ -10,116 +14,127 @@ const MessageActionsMenu = ({
   content,
   currentUserId,
   onStartDirectChat,
-  onReplyToMessage,
-  onDeleteMessage,
   isGroupChat,
+  onDeleteMessage,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const menuRef = useRef(null)
-  const buttonRef = useRef(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const { PORT } = useAuth()
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  const handleStartChat = () => {
-    onStartDirectChat(senderId, senderName)
-    setIsOpen(false)
-  }
-
-  const handleReply = () => {
-    if (onReplyToMessage) {
-      onReplyToMessage(messageId)
+  const handleCopyText = () => {
+    if (content) {
+      navigator.clipboard.writeText(content)
+      toast.success("Message copied to clipboard")
     }
     setIsOpen(false)
   }
 
-  const handleCopy = async () => {
+  const handleStartDirectChat = () => {
+    if (onStartDirectChat && senderId !== currentUserId) {
+      onStartDirectChat(senderId, senderName)
+    }
+    setIsOpen(false)
+  }
+
+  const handleDeleteMessage = () => {
+    if (!messageId || senderId !== currentUserId) {
+      toast.error("You can only delete your own messages")
+      return
+    }
+
+    setConfirmOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    setIsDeleting(true)
+    setConfirmOpen(false)
+
     try {
-      await navigator.clipboard.writeText(content)
+      const response = await axios.delete(`${PORT}/api/messages/${messageId}`, {
+        data: { userId: currentUserId },
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (response.status === 200) {
+        toast.success("Message deleted successfully")
+        onDeleteMessage?.(messageId)
+      }
     } catch (error) {
-      console.error("Failed to copy message:", error)
+      console.error("Error deleting message:", error)
+      const errorMessage = error.response?.data?.error || "Failed to delete message"
+      toast.error(errorMessage)
+    } finally {
+      setIsDeleting(false)
+      setIsOpen(false)
     }
-    setIsOpen(false)
   }
 
-  const handleDelete = () => {
-    if (onDeleteMessage) {
-      onDeleteMessage(messageId)
-    }
-    setIsOpen(false)
-  }
+  // Don't show menu if no actions are available
+  const canCopy = content && content.trim()
+  const canStartDirectChat = isGroupChat && senderId !== currentUserId
+  const canDelete = senderId === currentUserId
 
-  const isMyMessage = senderId === currentUserId
+  if (!canCopy && !canStartDirectChat && !canDelete) {
+    return null
+  }
 
   return (
     <div className="relative">
       <button
-        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200"
+        title="Message options"
       >
         <MoreVertical className="w-4 h-4 text-slate-500" />
       </button>
 
       {isOpen && (
-        <div
-          ref={menuRef}
-          className={`absolute z-50 mt-1 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 ${
-            isMyMessage ? "right-0" : "left-0"
-          }`}
-        >
-          {isGroupChat && !isMyMessage && (
-            <button
-              onClick={handleStartChat}
-              className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-950 flex items-center space-x-2"
-            >
-              <MessageCircle className="w-4 h-4 text-blue-500" />
-              <span>Message {senderName}</span>
-            </button>
-          )}
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
 
-          {onReplyToMessage && (
-            <button
-              onClick={handleReply}
-              className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center space-x-2"
-            >
-              <Reply className="w-4 h-4 text-slate-500" />
-              <span>Reply</span>
-            </button>
-          )}
+          {/* Menu */}
+          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 py-1 z-20 min-w-[160px]">
+            {canCopy && (
+              <button
+                onClick={handleCopyText}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-600 flex items-center space-x-2 text-slate-700 dark:text-slate-200"
+              >
+                <Copy className="w-4 h-4" />
+                <span>Copy text</span>
+              </button>
+            )}
 
-          <button
-            onClick={handleCopy}
-            className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center space-x-2"
-          >
-            <Copy className="w-4 h-4 text-slate-500" />
-            <span>Copy</span>
-          </button>
+            {canStartDirectChat && (
+              <button
+                onClick={handleStartDirectChat}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-600 flex items-center space-x-2 text-slate-700 dark:text-slate-200"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Message {senderName}</span>
+              </button>
+            )}
 
-          {isMyMessage && onDeleteMessage && (
-            <button
-              onClick={handleDelete}
-              className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 flex items-center space-x-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Delete</span>
-            </button>
-          )}
-        </div>
+            {canDelete && (
+              <button
+                onClick={handleDeleteMessage}
+                disabled={isDeleting}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2 text-red-600 dark:text-red-400 disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isDeleting ? "Deleting..." : "Delete message"}</span>
+              </button>
+            )}
+          </div>
+        </>
       )}
+      <ConfirmDialog
+        open={confirmOpen}
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }

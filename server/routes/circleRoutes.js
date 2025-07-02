@@ -6,7 +6,9 @@ import {
   getCircleMembers,
   getGroupsByUser,
   leaveCircle,
+  updateCircle,
 } from "../controllers/circleController.js"
+import upload from '../middleware/uploadCircleImageMiddleware.js'
 
 const circleRouter = express.Router()
 
@@ -27,5 +29,8 @@ circleRouter.get("/user-groups/:userId", getGroupsByUser)
 
 // POST /api/circles/leave
 circleRouter.post("/leave", leaveCircle)
+
+// PUT /api/circles/:groupId - Update group (name, avatar)
+circleRouter.put("/:groupId", upload.single("avatar"), updateCircle)
 
 export default circleRouter
