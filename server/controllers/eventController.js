@@ -3,57 +3,61 @@ import Event from '../models/eventModel.js';
 import User from '../models/userModel.js';
 import { validationResult } from 'express-validator';
 
-// GET /api/events - List all events with filtering, sorting, and pagination
+
+// GET /api/events
 const getAllEvents = async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 10,
-      category,
-      status = 'active',
+      limit = 12,
       search,
+      category,
+      status,
       sortBy = 'startDate',
       sortOrder = 'asc',
-      upcoming = false
-    } = req.query;
+      upcoming,
+    } = req.query
 
-    const query = {};
-    
-    // Build filter query
-    if (category && category !== 'all') {
-      query.category = category;
-    }
-    
-    if (status && status !== 'all') {
-      query.status = status;
-    }
-    
-    if (upcoming === 'true') {
-      query.startDate = { $gte: new Date() };
-    }
-    
+    const query = {}
+
+    // Search text
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
-        { tags: { $in: [new RegExp(search, 'i')] } }
-      ];
+        { tags: { $in: [new RegExp(search, 'i')] } },
+      ]
     }
 
-    const sortOptions = {};
-    sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    // Filter by category
+    if (category && category !== 'all') {
+      query.category = category
+    }
+
+    // Filter by status
+    if (status && status !== 'all') {
+      query.status = status
+    }
+
+    // Upcoming events filter
+    if (upcoming === 'true') {
+      query.startDate = { $gte: new Date() }
+    }
+
+    const sortOptions = {}
+    sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1
+
+    const total = await Event.countDocuments(query)
 
     const events = await Event.find(query)
       .populate('createdBy', 'name email')
       .populate('participants.user', 'name email')
       .sort(sortOptions)
-      .limit(limit * 1)
       .skip((page - 1) * limit)
-      .lean();
+      .limit(parseInt(limit))
+      .lean()
 
-    const total = await Event.countDocuments(query);
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         events,
@@ -62,18 +66,19 @@ const getAllEvents = async (req, res) => {
           totalPages: Math.ceil(total / limit),
           totalEvents: total,
           hasNext: page < Math.ceil(total / limit),
-          hasPrev: page > 1
-        }
-      }
-    });
+          hasPrev: page > 1,
+        },
+      },
+    })
   } catch (error) {
-    res.status(500).json({
+    console.error('Failed to fetch events:', error.message)
+    return res.status(500).json({
       success: false,
       message: 'Failed to fetch events',
-      error: error.message
-    });
+    })
   }
-};
+}
+
 
 // POST /api/events - Create new event
 const createEvent = async (req, res) => {

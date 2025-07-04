@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
-import User from "../models/userModel.js" // Adjust path as needed
+import User from "../models/userModel.js"
 
-// Middleware to verify JWT token
+// Middleware: Bearer Token in header
 export const authenticateToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"]
@@ -13,7 +13,6 @@ export const authenticateToken = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key")
 
-    // Get user from database
     const user = await User.findById(decoded.userId).select("-password")
     if (!user) {
       return res.status(401).json({ message: "Invalid token - user not found" })
@@ -29,6 +28,29 @@ export const authenticateToken = async (req, res, next) => {
       return res.status(401).json({ message: "Token expired" })
     }
     return res.status(500).json({ message: "Token verification failed" })
+  }
+}
+
+// ✅ Middleware: Token from Cookie
+export const protect = async (req, res, next) => {
+  try {
+    const token = req.cookies.token
+
+    if (!token) {
+      return res.status(401).json({ message: "No token found in cookies" })
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId).select("-password")
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" })
+    }
+
+    req.user = user
+    next()
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" })
   }
 }
 
@@ -53,43 +75,46 @@ export const checkItemOwnership = async (req, res, next) => {
   }
 }
 
+// Middleware: Token in Header
 export const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    const token = req.header('Authorization')?.replace('Bearer ', '')
+
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided'
-      });
+        message: 'No token provided',
+      })
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.userId)
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid token'
-      });
+        message: 'Invalid token: user not found',
+      })
     }
 
-    req.user = user;
-    next();
+    req.user = user
+    next()
   } catch (error) {
+    console.error("Auth error:", error.message)
     res.status(401).json({
       success: false,
-      message: 'Token verification failed'
-    });
+      message: 'Token verification failed',
+    })
   }
-};
+}
 
+// Admin Only
 export const adminAuth = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Admin access required'
-    });
+  if (req.user && req.user.role === 'admin') {
+    return next()
   }
-  next();
-};
+  return res.status(403).json({
+    success: false,
+    message: 'Access denied. Admins only.',
+  })
+}

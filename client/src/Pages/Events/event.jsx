@@ -1,123 +1,261 @@
-import React, { useState } from 'react';
+"use client"
 
-const Event = () => {
-  const [isAdmin, setIsAdmin] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [newEvent, setNewEvent] = useState({ title: '', description: '', date: '' });
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { EventCard } from "./Component/EventCard"
+import { EventFilters } from "./Component/EventFilter"
+import { CreateEventModal } from "./Component/CreateEvent"
+import { Plus, Loader2 } from "lucide-react"
+import { apiClient } from "@/lib/api/EventAPi"
+import toast from 'react-hot-toast'
 
-  const dummyEvents = [
-    {
-      _id: '1',
-      title: 'Clothes Donation Drive',
-      description: 'Help us collect warm clothes for the upcoming winter.',
-      date: '2025-07-05T10:00:00Z'
-    },
-    {
-      _id: '2',
-      title: 'Food Distribution @ Shelter',
-      description: 'Join us to distribute home-cooked meals.',
-      date: '2025-07-12T16:00:00Z'
-    },
-    {
-      _id: '3',
-      title: 'Neighborhood Cleanup',
-      description: 'Let’s make our parks and streets clean again!',
-      date: '2025-07-20T08:30:00Z'
+
+export default function EventsPage() {
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalEvents: 0,
+    hasNext: false,
+    hasPrev: false,
+  })
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "all",
+    status: "active",
+    sortBy: "startDate",
+    sortOrder: "asc",
+    upcoming: false,
+    page: 1,
+    limit: 12,
+  })
+  const [joinedEvents, setJoinedEvents] = useState(new Set())
+
+  const fetchEvents = async () => {
+    setLoading(true)
+    try {
+      const response = await apiClient.getAllEvents(filters)
+      if (response.success && response.data) {
+        setEvents(response.data.events)
+        setPagination(response.data.pagination)
+      } else {
+        toast.error("Failed to fetch events")
+      }
+    } catch (error) {
+      toast.error("Failed to fetch events")
+    } finally {
+      setLoading(false)
     }
-  ];
+  }
 
-  const handleSelect = (event) => {
-    setSelectedEvent(event);
-  };
+  useEffect(() => {
+    fetchEvents()
+  }, [filters])
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }))
+  }
+
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      category: "all",
+      status: "active",
+      sortBy: "startDate",
+      sortOrder: "asc",
+      upcoming: false,
+      page: 1,
+      limit: 12,
+    })
+  }
+
+  const handlePageChange = (page) => {
+    setFilters((prev) => ({ ...prev, page }))
+  }
+
+  const handleJoinEvent = async (eventId) => {
+    try {
+      const response = await apiClient.joinEvent(eventId)
+      if (response.success) {
+        setJoinedEvents((prev) => new Set([...prev, eventId]))
+        toast.success("Successfully joined the event!")
+        fetchEvents()
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      toast.error("Failed to join event")
+    }
+  }
+
+  const handleLeaveEvent = async (eventId) => {
+    try {
+      const response = await apiClient.leaveEvent(eventId)
+      if (response.success) {
+        setJoinedEvents((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(eventId)
+          return newSet
+        })
+        toast.success("Successfully left the event")
+        fetchEvents()
+      } else {
+        toast.error(response.error || "Failed to leave event")
+      }
+    } catch (error) {
+      toast.error("Failed to leave event")
+    }
+  }
+
+  const handleEventCreated = () => {
+    setIsCreateModalOpen(false)
+    fetchEvents()
+    toast.success("Event created successfully!")
+  }
 
   return (
-    <div className="p-6 space-y-6 mt-20">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">🌟 Community Events</h1>
-        <button
-          onClick={() => setIsAdmin(!isAdmin)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded shadow"
-        >
-          {isAdmin ? '🔒 Admin Mode' : '🔓 User Mode'}
-        </button>
-      </div>
-
-      {isAdmin && (
-        <div className="p-4 border rounded-md bg-gray-50 space-y-3">
-          <h2 className="text-xl font-semibold text-gray-700">📝 Create New Event</h2>
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Event Title"
-            value={newEvent.title}
-            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-          />
-          <textarea
-            className="w-full border p-2 rounded"
-            placeholder="Description"
-            value={newEvent.description}
-            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-          />
-          <input
-            className="w-full border p-2 rounded"
-            type="date"
-            value={newEvent.date}
-            onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-          />
-          <button className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600">
-            ➕ Create Event
-          </button>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {dummyEvents.map((event) => (
-          <div
-            key={event._id}
-            className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition"
-          >
-            <h3 className="text-lg font-bold text-gray-800">{event.title}</h3>
-            <p className="text-gray-600">{event.description}</p>
-            <p className="text-sm text-gray-400 mt-1">📅 {new Date(event.date).toDateString()}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                onClick={() => handleSelect(event)}
-                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-              >
-                📄 View
-              </button>
-              <button className="bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600">
-                🤝 Join
-              </button>
-              {isAdmin && (
-                <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
-                  🎁 Reward
-                </button>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 mt-15">
+      <div className="container mx-auto px-4 py-8">
+        {/* Hero */}
+        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-8 mb-8 text-white">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Discover Events</h1>
+              <p className="text-orange-100 text-lg">
+                Join amazing community events and make a difference
+              </p>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {selectedEvent && (
-        <div className="p-5 border-t pt-6 space-y-3 bg-gray-50 rounded-md shadow-inner mt-6">
-          <h2 className="text-2xl font-bold text-gray-700">📌 Event Details</h2>
-          <h3 className="text-lg font-semibold">{selectedEvent.title}</h3>
-          <p>{selectedEvent.description}</p>
-          <p className="text-sm text-gray-500">📅 {new Date(selectedEvent.date).toLocaleString()}</p>
-          <div className="flex gap-3 mt-2">
-            <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">
-              Join
-            </button>
-            {isAdmin && (
-              <button className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600">
-                Reward
-              </button>
-            )}
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Create Event
+            </Button>
           </div>
         </div>
-      )}
-    </div>
-  );
-};
 
-export default Event;
+        {/* Filters */}
+        <Card className="mb-8 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-orange-100 to-amber-100 rounded-0">
+            <CardTitle className="text-orange-800 flex items-center gap-2">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              Filter Events
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <EventFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              onClearFilters={handleClearFilters}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Events Grid or Empty State */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-orange-500" />
+          </div>
+        ) : events.length === 0 ? (
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardContent className="text-center py-16">
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-200 to-amber-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Plus className="h-10 w-10 text-orange-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-3">No events found</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                Try adjusting your filters or be the first to create an amazing event for the community
+              </p>
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl"
+              >
+                Create First Event
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {events.map((event) => (
+                <EventCard
+                  key={event._id}
+                  event={event}
+                  onJoin={handleJoinEvent}
+                  onLeave={handleLeaveEvent}
+                  isJoined={joinedEvents.has(event._id)}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center gap-3 mb-8">
+                <Button
+                  variant="outline"
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={!pagination.hasPrev}
+                  className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                >
+                  Previous
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    const page = i + 1
+                    return (
+                      <Button
+                        key={page}
+                        variant={page === pagination.currentPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(page)}
+                        className={
+                          page === pagination.currentPage
+                            ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white"
+                            : "border-orange-200 text-orange-600 hover:bg-orange-50"
+                        }
+                      >
+                        {page}
+                      </Button>
+                    )
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={!pagination.hasNext}
+                  className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+
+            {/* Showing count */}
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                <span className="text-orange-700 font-medium">
+                  Showing {events.length} of {pagination.totalEvents} events
+                </span>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Create Event Modal */}
+        <CreateEventModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onEventCreated={handleEventCreated}
+        />
+      </div>
+    </div>
+  )
+}

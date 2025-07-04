@@ -123,5 +123,5 @@ eventSchema.virtual('isExpired').get(function() {
 
 eventSchema.set('toJSON', { virtuals: true });
 
-const Event = mongoose.models.Event || mongoose.model('Event', eventSchema);
+const Event = mongoose.models.Event || mongoose.model('event', eventSchema);
 export default Event;

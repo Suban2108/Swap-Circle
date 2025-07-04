@@ -5,7 +5,7 @@ import { OAuth2Client } from 'google-auth-library'
 import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 
-const client = new OAuth2Client(process.env.CLIENT_ID)
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
@@ -15,11 +15,17 @@ const transporter = nodemailer.createTransport({
   }
 })
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  maxAge: 24 * 60 * 60 * 1000,
+}
+
 // REGISTER
 const registerByEmail = async (req, res) => {
   try {
     const { email, password, name, role } = req.body
-
     const existingUser = await User.findOne({ email })
     if (existingUser) return res.status(400).json({ message: 'User already exists' })
 
@@ -33,14 +39,22 @@ const registerByEmail = async (req, res) => {
       { expiresIn: '24h' }
     )
 
+    console.log("[Register] Token:", token)
+
+    res.cookie("token", token, COOKIE_OPTIONS)
+    res.cookie("userId", user._id.toString(), {
+      ...COOKIE_OPTIONS,
+      httpOnly: false,
+    })
+
     res.status(201).json({
       message: 'User created successfully',
-      token,
       userId: user._id,
       role: user.role
     })
 
   } catch (error) {
+    console.error("Register Error:", error)
     res.status(500).json({ message: 'Error creating user', error: error.message })
   }
 }
@@ -48,7 +62,7 @@ const registerByEmail = async (req, res) => {
 // LOGIN
 const loginByEmail = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password, role } = req.body
     const user = await User.findOne({ email })
     if (!user) return res.status(401).json({ message: 'Invalid email or password' })
 
@@ -61,14 +75,22 @@ const loginByEmail = async (req, res) => {
       { expiresIn: '24h' }
     )
 
+    console.log("[Login] Token:", token)
+
+    res.cookie("token", token, COOKIE_OPTIONS)
+    res.cookie("userId", user._id.toString(), {
+      ...COOKIE_OPTIONS,
+      httpOnly: false,
+    })
+
     res.status(200).json({
       message: 'Login successful',
-      token,
       userId: user._id,
       role: user.role
     })
 
   } catch (error) {
+    console.error("Login Error:", error)
     res.status(500).json({ message: 'Error logging in', error: error.message })
   }
 }
@@ -77,7 +99,6 @@ const loginByEmail = async (req, res) => {
 const googleByLogin = async (req, res) => {
   try {
     const { token } = req.body
-
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -93,7 +114,7 @@ const googleByLogin = async (req, res) => {
         email,
         password: 'google-auth',
         profilePic: picture,
-        role: 'user' // default role
+        role: 'user'
       })
       await user.save()
     }
@@ -104,6 +125,14 @@ const googleByLogin = async (req, res) => {
       { expiresIn: '24h' }
     )
 
+    console.log("[Google Login] Token:", authToken)
+
+    res.cookie("token", authToken, COOKIE_OPTIONS)
+    res.cookie("userId", user._id.toString(), {
+      ...COOKIE_OPTIONS,
+      httpOnly: false,
+    })
+
     res.status(200).json({
       user: {
         name: user.name,
@@ -111,17 +140,27 @@ const googleByLogin = async (req, res) => {
         profilePic: user.profilePic,
         role: user.role
       },
-      token: authToken,
       message: 'Login success'
     })
   } catch (err) {
-    console.error('OAuth Error:', err)
+    console.error('Google OAuth Error:', err)
     res.status(401).json({ message: 'Unauthorized' })
   }
 }
 
+// LOGOUT
+const logoutUser = (req, res) => {
+  res.clearCookie("token", COOKIE_OPTIONS)
+  res.clearCookie("userId", {
+    ...COOKIE_OPTIONS,
+    httpOnly: false,
+  })
 
-// Forgot Password controller
+  console.log("[Logout] Cookies cleared")
+  res.status(200).json({ message: "Logged out successfully" })
+}
+
+// FORGOT PASSWORD
 const forgotPassword = async (req, res) => {
   const { email } = req.body
   if (!email) return res.status(400).json({ message: 'Email is required' })
@@ -129,7 +168,6 @@ const forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email })
     if (!user) {
-      // Don't reveal user existence
       return res.status(200).json({ message: 'If this email exists, a reset link will be sent' })
     }
 
@@ -137,41 +175,26 @@ const forgotPassword = async (req, res) => {
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex')
 
     user.resetPasswordToken = hashedToken
-    user.resetPasswordExpires = Date.now() + 1000 * 60 * 15 // 15 min
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000
     await user.save()
 
-    const resetUrl = `${process.env.FRONTEND_URL}/login?mode=reset-password&token=${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/login?mode=reset-password&token=${resetToken}`
 
     await transporter.sendMail({
       to: user.email,
       from: process.env.EMAIL_FROM,
       subject: '🔐 Reset Your Password - Swap Circle',
-      html: `
-    <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: auto; border: 1px solid #eaeaea; padding: 32px; border-radius: 8px; background-color: #ffffff;">
-      <div style="text-align: center;">
-        <h2 style="color: #333;">🔄 Reset Your Password</h2>
-        <p style="font-size: 16px; color: #555;">Hi ${user.name || ''},</p>
-        <p style="font-size: 16px; color: #555;">You recently requested to reset your password for your <strong>Swap Circle</strong> account. Click the button below to reset it:</p>
-        <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #2D9CDB; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0;">
-          Reset Password
-        </a>
-        <p style="font-size: 14px; color: #888;">This link will expire in 15 minutes.</p>
-        <hr style="margin: 32px 0; border: none; border-top: 1px solid #eaeaea;" />
-        <p style="font-size: 12px; color: #aaa;">If you didn’t request this, please ignore this email. Your password will remain unchanged.</p>
-        <p style="font-size: 12px; color: #aaa;">Need help? Reach us at support@swapcircle.com</p>
-      </div>
-    </div>
-  `,
-    });
+      html: `Click here to reset: <a href="${resetUrl}">Reset Password</a>`
+    })
 
-
-    res.status(200).json({ message: 'A reset link has been sent to your email !!!' })
+    res.status(200).json({ message: 'A reset link has been sent to your email.' })
   } catch (err) {
-    console.error(err)
+    console.error("Forgot Password Error:", err)
     res.status(500).json({ message: 'Server error' })
   }
 }
 
+// RESET PASSWORD
 const resetPassword = async (req, res) => {
   const { email, password, confirmPassword, token } = req.body;
 
@@ -196,8 +219,7 @@ const resetPassword = async (req, res) => {
       return res.status(403).json({ message: 'Token is invalid or has expired.' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(password, salt);
+    const hashed = await bcrypt.hash(password, 10);
 
     user.password = hashed;
     user.resetPasswordToken = undefined;
@@ -209,6 +231,13 @@ const resetPassword = async (req, res) => {
     console.error('Reset error:', error);
     res.status(500).json({ message: 'Something went wrong. Try again later.' });
   }
-};
+}
 
-export { loginByEmail, registerByEmail, googleByLogin, forgotPassword, resetPassword }
+export {
+  loginByEmail,
+  registerByEmail,
+  googleByLogin,
+  logoutUser,
+  resetPassword,
+  forgotPassword
+}

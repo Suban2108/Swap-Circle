@@ -141,12 +141,14 @@ export default function UserProfile() {
   const [isAdmin, setIsAdmin] = useState(null)
 
   const { PORT, userId } = useAuth()
-  const USER_ID = userId || localStorage.getItem("userId")
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`${PORT}/api/users/${USER_ID}`)
+        const { data } = await axios.get(`${PORT}/api/users/${userId}`, {
+          withCredentials: true,
+        })
+
         setUserData({
           ...data,
           avatar: data.avatar || default_user_image,
@@ -165,7 +167,7 @@ export default function UserProfile() {
     }
 
     fetchUser()
-  }, [])
+  }, [PORT, userId])
 
   const handleInputChange = (field, value) => {
     setUserData((prev) => ({ ...prev, [field]: value }))
@@ -203,8 +205,9 @@ export default function UserProfile() {
     formData.append("image", selectedFile)
 
     try {
-      const { data } = await axios.post(`${PORT}/api/users/${USER_ID}/upload`, formData, {
+      const { data } = await axios.post(`${PORT}/api/users/${userId}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
       })
 
       setUserData((prev) => ({ ...prev, avatar: data.avatar }))
@@ -212,17 +215,21 @@ export default function UserProfile() {
       setSelectedFile(null)
       toast.success("Image Updated!")
 
-      setInterval(() => {
-        window.location.reload();
-      }, 2000);
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
     } catch (error) {
       console.error("Upload failed:", error)
     }
   }
 
+
   const handleSaveProfile = async () => {
     try {
-      const response = await axios.put(`${PORT}/api/users/${USER_ID}`, userData)
+      const response = await axios.put(`${PORT}/api/users/${userId}`, userData, {
+        withCredentials: true,
+      })
+
       setUserData(response.data)
       setIsEditing(false)
       toast.success("Profile Updated")
@@ -230,6 +237,7 @@ export default function UserProfile() {
       console.error("Update error:", error)
     }
   }
+
 
   const tabItems = [
     { id: "overview", label: "Overview", icon: <User className="w-4 h-4" /> },

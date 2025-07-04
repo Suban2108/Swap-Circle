@@ -7,147 +7,126 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/authContext';
 import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from '../../Components/ui/select';
 
 const AuthForms = () => {
-    const [formValues, setFormValues] = useState({
-        fullName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        token: '',
-        role: '',
-    });
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [mode, setMode] = useState('signin');
+  const [formValues, setFormValues] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    token: '',
+    role: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [mode, setMode] = useState('signin');
 
-    const { PORT } = useAuth();
-    const location = useLocation();
+  const { PORT } = useAuth();
+  const location = useLocation();
 
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const modeParam = params.get('mode');
-        const tokenParam = params.get('token');
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const modeParam = params.get('mode');
+    const tokenParam = params.get('token');
+    setMode(modeParam || 'signin');
+    if (modeParam === 'reset-password' && tokenParam) {
+      setFormValues((prev) => ({ ...prev, token: tokenParam }));
+    }
+  }, [location.search]);
 
-        setMode(modeParam || 'signin');
-        if (modeParam === 'reset-password' && tokenParam) {
-            setFormValues((prev) => ({ ...prev, token: tokenParam }));
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [mode]);
+
+  const isLogin = mode === 'signin';
+  const isRegister = mode === 'signup';
+  const isForgotPassword = mode === 'forgot-password';
+  const isResetPassword = mode === 'reset-password';
+
+  useEffect(() => {
+    if (isResetPassword) {
+      toast('This reset page may have opened in a new tab.', {
+        duration: 5000,
+        position: 'top-center',
+      });
+    }
+  }, [isResetPassword]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const instance = axios.create({
+        baseURL: PORT,
+        withCredentials: true, // ✅ important
+      });
+
+      if (isRegister) {
+        if (!formValues.role) return toast.error("Please select a role");
+        if (formValues.password !== formValues.confirmPassword) return toast.error("Passwords do not match");
+
+        await instance.post('/api/auth/register', {
+          email: formValues.email,
+          password: formValues.password,
+          name: formValues.fullName,
+          role: formValues.role,
+        });
+
+        toast.success("Registration successful!");
+        setTimeout(() => (window.location.href = "/"), 1500);
+      }
+
+      if (isLogin) {
+        if (!formValues.role) return toast.error("Please select a role");
+
+        await instance.post('/api/auth/login', {
+          email: formValues.email,
+          password: formValues.password,
+          role: formValues.role,
+        });
+
+        toast.success("Login successful!");
+        setTimeout(() => (window.location.href = "/"), 1500);
+      }
+
+      if (isForgotPassword) {
+        await instance.post('/api/auth/forgot-password', {
+          email: formValues.email,
+        });
+        toast.success("Reset email sent if user exists.");
+      }
+
+      if (isResetPassword) {
+        if (formValues.password !== formValues.confirmPassword) {
+          return toast.error("Passwords do not match");
         }
-    }, [location.search]);
 
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [mode]);
+        await instance.post('/api/auth/reset-password', {
+          token: formValues.token,
+          email: formValues.email,
+          password: formValues.password,
+          confirmPassword: formValues.confirmPassword,
+        });
 
-    const isLogin = mode === 'signin';
-    const isRegister = mode === 'signup';
-    const isForgotPassword = mode === 'forgot-password';
-    const isResetPassword = mode === 'reset-password';
-
-    useEffect(() => {
-        if (isResetPassword) {
-            toast('This reset page may have opened in a new tab.', {
-                duration: 5000,
-                position: 'top-center',
-            });
-        }
-    }, [isResetPassword]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormValues((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        try {
-            if (isRegister) {
-                if (!formValues.role) {
-                    toast.error('Please select a role');
-                    return;
-                }
-
-                if (formValues.password !== formValues.confirmPassword) {
-                    toast.error('Passwords do not match');
-                    return;
-                }
-
-                const res = await axios.post(`${PORT}/api/auth/register`, {
-                    email: formValues.email,
-                    password: formValues.password,
-                    name: formValues.fullName,
-                    role: formValues.role,
-                });
-
-                localStorage.setItem('token', res.data.token);
-                localStorage.setItem('userId', res.data.userId);
-
-                toast.success('Registration successful! Redirecting...');
-                setTimeout(() => (window.location.href = '/'), 1500);
-            }
-
-            if (isLogin) {
-                if (!formValues.role) {
-                    toast.error('Please select a role');
-                    return;
-                }
-
-                const res = await axios.post(`${PORT}/api/auth/login`, {
-                    email: formValues.email,
-                    password: formValues.password,
-                    role: formValues.role,
-                });
-
-                localStorage.setItem('token', res.data.token);
-                localStorage.setItem('userId', res.data.userId);
-
-                toast.success('Login successful! Redirecting...');
-                setTimeout(() => (window.location.href = '/'), 1500);
-            }
-
-            if (isForgotPassword) {
-                const res = await axios.post(`${PORT}/api/auth/forgot-password`, {
-                    email: formValues.email,
-                });
-
-                toast.success(res.data.message);
-            }
-
-            if (isResetPassword) {
-                if (!formValues.token) {
-                    toast.error('Missing token in the URL');
-                    return;
-                }
-
-                if (formValues.password !== formValues.confirmPassword) {
-                    toast.error('Passwords do not match');
-                    return;
-                }
-
-                const res = await axios.post(`${PORT}/api/auth/reset-password`, {
-                    email: formValues.email,
-                    password: formValues.password,
-                    confirmPassword: formValues.confirmPassword,
-                    token: formValues.token,
-                });
-
-                toast.success(res.data.message || 'Password reset successful!');
-                setTimeout(() => (window.location.href = '/login?mode=signin'), 1500);
-            }
-        } catch (err) {
-            const errorMessage = err.response?.data?.message || 'Something went wrong';
-            toast.error(errorMessage);
-            console.error('Auth Error:', err);
-        }
-    };
-
+        toast.success("Password reset successful.");
+        setTimeout(() => (window.location.href = "/login?mode=signin"), 1500);
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
+    }
+  };
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-700 via-white to-orange-700 flex items-center justify-center py-[100px]">
             <div className="w-full max-w-md">
@@ -176,12 +155,9 @@ const AuthForms = () => {
                                 <GoogleLogin
                                     onSuccess={async (credentialResponse) => {
                                         try {
-                                            const res = await axios.post(`${PORT}/api/auth/google`, {
-                                                token: credentialResponse.credential,
-                                            });
-
-                                            localStorage.setItem('token', res.data.token);
-                                            localStorage.setItem('email', res.data.user.email);
+                                            const res = await axios.post(`${PORT}/api/auth/google`, 
+                                            {token: credentialResponse.credential,},
+                                            { withCredentials: true });
                                             toast.success('Logged in with Google!');
                                             setTimeout(() => {
                                                 window.location.href = '/';

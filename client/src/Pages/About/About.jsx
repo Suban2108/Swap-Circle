@@ -20,7 +20,7 @@ import Banner_Image from '../../assets/About-banner.avif'
 
 // Hero Section Component
 const HeroSection = () => (
-  <div className="bg-gradient-to-r mt-[20px] from-blue-50 to-orange-500 py-20 px-6">
+  <div className=" mt-[20px] bg-gradient-to-br from-orange-50 via-amber-500 to-yellow-50 py-20 px-6">
     <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
       
       {/* Text Section */}
@@ -287,7 +287,7 @@ const SocialImpact = () => (
 
 // Call to Action Component
 const CallToAction = () => (
-  <div className="py-20 px-6 bg-gradient-to-r from-orange-50 to-blue-50">
+  <div className="py-20 px-6 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
     <div className="max-w-4xl mx-auto text-center">
       <h2 className="text-4xl font-bold text-gray-900 mb-6">
         Ready to Join the Circle?
@@ -310,7 +310,7 @@ const CallToAction = () => (
 // Main About Component
 const About = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
       <HeroSection />
       <MissionStatement />
       <TargetAudiences />

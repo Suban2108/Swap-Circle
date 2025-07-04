@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import path from "path"
+import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url'
 import { connectDB } from "./config/db.js"
 import authRouter from "./routes/authRoutes.js"
@@ -25,9 +26,13 @@ const app = express();
 const PORT = process.env.PORT || 5005;
 
 //middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true, // 👈 allows cookies to be sent
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 
 // Make uploads folder publicly accessible
