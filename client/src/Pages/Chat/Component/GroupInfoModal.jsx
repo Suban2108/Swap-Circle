@@ -249,7 +249,7 @@ const GroupInfoModal = ({
               </>
             )}
             <button
-              onClick={onClose}
+              onClick={()=>{onClose,window.location.reload()}}
               className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
               <X className="w-5 h-5 text-slate-500" />
@@ -345,7 +345,7 @@ const GroupInfoModal = ({
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-blue-500 to-orange-500 text-white relative overflow-hidden">
                       {member.avatar ? (
                         <img
-                          src={member.avatar || "/placeholder.svg"}
+                          src={`${PORT}${member.avatar}` || "/placeholder.svg"}
                           alt={member.name}
                           className="w-full h-full rounded-full object-cover"
                           onError={(e) => {

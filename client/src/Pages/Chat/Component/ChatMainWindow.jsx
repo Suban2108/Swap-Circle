@@ -23,6 +23,7 @@ import GroupInfoModal from "./GroupInfoModal"
 import { useAuth } from "../../../context/authContext"
 import { chatAPI } from "../../../lib/api/ChatApi.js"
 import toast from "react-hot-toast"
+import { Skeleton } from "../../../Components/ui/skeleton"
 
 const ChatMainWindow = ({
   selectedChat,
@@ -49,7 +50,6 @@ const ChatMainWindow = ({
   const { PORT } = useAuth()
   const [groupDetails, setGroupDetails] = useState(null)
 
-  // Debug logging for selectedChat
   useEffect(() => {
     console.log("=== ChatMainWindow Debug ===")
     console.log("Selected Chat:", selectedChat)
@@ -59,12 +59,6 @@ const ChatMainWindow = ({
     console.log("===========================")
   }, [selectedChat, messages])
 
-  // Scroll to bottom when messages change
-  // useEffect(() => {
-  //   messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  // }, [messages])
-
-  // Fetch group details when a group chat is selected
   useEffect(() => {
     const fetchGroupDetailsOnSelect = async () => {
       if (selectedChat?.type === "group" && (selectedChat.groupId || selectedChat._id)) {
@@ -100,7 +94,6 @@ const ChatMainWindow = ({
       toast.success("File sent successfully!")
     } catch (error) {
       console.error("Error sending file:", error)
-      // toast.error("Failed to send file")
     } finally {
       setIsUploading(false)
     }
@@ -120,7 +113,6 @@ const ChatMainWindow = ({
     console.log("File selected:", file)
     setSelectedFile(file)
 
-    // Create preview for images
     if (file.type.startsWith("image/")) {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -131,7 +123,6 @@ const ChatMainWindow = ({
       setFilePreview(null)
     }
 
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -170,7 +161,6 @@ const ChatMainWindow = ({
     return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
-  // Enhanced file type detection
   const getFileIcon = (messageType, fileName) => {
     if (messageType === "image") {
       return <ImageIcon className="w-4 h-4" />
@@ -185,7 +175,6 @@ const ChatMainWindow = ({
     }
   }
 
-  // Enhanced update group info handler
   const handleUpdateGroupInfo = async (groupId, updateData) => {
     try {
       console.log("ChatMainWindow: Updating group info:", groupId, updateData)
@@ -231,17 +220,14 @@ const ChatMainWindow = ({
     }
   }
 
-  // Handle message deletion
   const handleDeleteMessage = (messageId) => {
     console.log("Message deleted:", messageId)
 
-    // Call the parent component's delete handler to update the messages list
     if (onDeleteMessage) {
       onDeleteMessage(messageId)
     }
   }
 
-  // Helper function to get the correct avatar URL
   const getAvatarUrl = () => {
     const isGroupChat = selectedChat?.type === "group"
 
@@ -253,7 +239,6 @@ const ChatMainWindow = ({
     }
   }
 
-  // Helper function to get display name
   const getDisplayName = () => {
     const isGroupChat = selectedChat?.type === "group"
     if (isGroupChat) {
@@ -262,14 +247,31 @@ const ChatMainWindow = ({
     return selectedChat?.name || "Unknown"
   }
 
-  // Updated message rendering to handle the new API response structure
+  const renderMessageSkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
+          <div className="max-w-[85%] sm:max-w-xs lg:max-w-md space-y-1">
+            {i % 2 === 0 && selectedChat?.type === "group" && <Skeleton className="h-3 w-20 ml-1" />}
+            <div className="flex items-end space-x-2">
+              <Skeleton
+                className={`h-12 rounded-2xl ${i % 2 === 0 ? "rounded-bl-md" : "rounded-br-md"}`}
+                style={{ width: `${120 + Math.random() * 100}px` }}
+              />
+            </div>
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+
   const renderMessage = (msg) => {
     console.log("Rendering message:", msg)
 
     const isMe = msg.senderId._id === currentUserId
     const isGroupChat = selectedChat?.type === "group"
 
-    // Handle file messages based on messageType from API response
     if (msg.messageType && msg.messageType !== "text" && msg.fileUrl) {
       console.log("Rendering file message:", {
         messageType: msg.messageType,
@@ -282,7 +284,7 @@ const ChatMainWindow = ({
         <div key={msg._id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
           <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? "order-2" : "order-1"}`}>
             {isGroupChat && !isMe && (
-              <div className="text-xs text-slate-500 dark:text-slate-400 mb-1 ml-1">{msg.senderId.name}</div>
+              <div className="text-xs text-blue-700 dark:text-blue-400 mb-1 ml-1">{msg.senderId.name}</div>
             )}
             <div className="flex items-end space-x-2">
               <div
@@ -393,12 +395,11 @@ const ChatMainWindow = ({
       )
     }
 
-    // Handle regular text messages
     return (
       <div key={msg._id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
         <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? "order-2" : "order-1"}`}>
           {isGroupChat && !isMe && (
-            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1 ml-1">{msg.senderId.name}</div>
+            <div className="text-xs text-blue-700 dark:text-blue-400 mb-1 ml-1">{msg.senderId.name}</div>
           )}
           <div className="flex items-end space-x-2">
             <div
@@ -552,9 +553,7 @@ const ChatMainWindow = ({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
         {loading ? (
-          <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          </div>
+          renderMessageSkeleton()
         ) : messages.length === 0 ? (
           <div className="flex justify-center items-center h-full text-slate-500 dark:text-slate-400">
             No messages yet. Start the conversation!

@@ -162,7 +162,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     return transformedConversation
   }
 
-  // Updated file upload handler to match your API endpoint
   const handleSendFile = async (file, caption = "") => {
     if (!selectedConversation || !file) {
       console.error("Missing conversation or file")
@@ -188,7 +187,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
         formData.append("content", caption.trim())
       }
 
-      // Log FormData contents for debugging
       for (const [key, value] of formData.entries()) {
         console.log(`FormData ${key}:`, value)
       }
@@ -196,16 +194,14 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
       const response = await axios.post(`${PORT}/api/messages/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          // Add authorization header if needed
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        timeout: 30000, // 30 second timeout for file uploads
+        timeout: 30000,
       })
 
       console.log("File upload response:", response.data)
 
       if (response.status === 201) {
-        // Refresh messages to show the new file message
         await fetchConversationMessages(selectedConversation._id)
       } else {
         throw new Error(`Upload failed with status: ${response.status}`)
@@ -224,7 +220,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     }
   }
 
-  // Update group info handler
   const handleUpdateGroupInfo = async (groupId, updateData) => {
     try {
       console.log("ChatContainer: Updating group info:", groupId, updateData)
@@ -233,7 +228,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
 
       console.log("ChatContainer: Update result:", result)
 
-      // Refresh conversations to get updated data
       if (refreshConversations) {
         await refreshConversations()
       }
@@ -245,21 +239,17 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     }
   }
 
-  // Add refresh chat handler
   const handleRefreshChat = async (conversationId) => {
     try {
       console.log("ChatContainer: Refreshing chat:", conversationId)
 
-      // If we have a refresh function from useChat hook, use it
       if (refreshConversations) {
         await refreshConversations()
       }
 
-      // Find and update the selected conversation
       const updatedGroupConversations = groupConversations
       const updatedDirectConversations = directConversations
 
-      // Find the conversation in either list
       const updatedConversation =
         updatedGroupConversations.find((c) => c._id === conversationId) ||
         updatedDirectConversations.find((c) => c._id === conversationId)
@@ -273,15 +263,9 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     }
   }
 
-  // Add this function after handleRefreshChat
   const handleDeleteMessage = (messageId) => {
     console.log("ChatContainer: Deleting message from UI:", messageId)
 
-    // Remove the message from the messages array in your useChat hook
-    // This depends on your useChat implementation
-    // You might need to add a deleteMessage function to your useChat hook
-
-    // For now, refresh the conversation messages
     if (selectedConversation) {
       fetchConversationMessages(selectedConversation._id)
     }
@@ -291,22 +275,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     mode === "groups"
       ? groupConversations.map(transformConversationForUI)
       : directConversations.map(transformConversationForUI)
-
-  if (error) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="h-screen md:h-[700px] md:mt-16 mt-16 flex bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950 overflow-hidden">
@@ -355,7 +323,7 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
           onGetGroupMembers={handleGetGroupMembers}
           onUpdateGroupInfo={handleUpdateGroupInfo}
           onRefreshChat={handleRefreshChat}
-          onDeleteMessage={handleDeleteMessage} // Add this line
+          onDeleteMessage={handleDeleteMessage}
           loading={loading}
           onShowGroupDetails={handleGetCircleDetails}
           currentUserId={userId}

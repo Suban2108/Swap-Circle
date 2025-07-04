@@ -8,39 +8,44 @@ import nodemailer from 'nodemailer'
 const client = new OAuth2Client(process.env.CLIENT_ID)
 
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', // or use SMTP config
+  service: 'Gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   }
 })
 
-// Register controller
+// REGISTER
 const registerByEmail = async (req, res) => {
   try {
-    const { email, password, name } = req.body
+    const { email, password, name, role } = req.body
+
     const existingUser = await User.findOne({ email })
     if (existingUser) return res.status(400).json({ message: 'User already exists' })
 
     const hashedPassword = await bcrypt.hash(password, 12)
-
-    const user = new User({ name, email, password: hashedPassword })
+    const user = new User({ name, email, password: hashedPassword, role })
     await user.save()
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     )
 
-    res.status(201).json({ message: 'User created successfully', token, userId: user._id })
+    res.status(201).json({
+      message: 'User created successfully',
+      token,
+      userId: user._id,
+      role: user.role
+    })
 
   } catch (error) {
     res.status(500).json({ message: 'Error creating user', error: error.message })
   }
 }
 
-// Login controller
+// LOGIN
 const loginByEmail = async (req, res) => {
   try {
     const { email, password } = req.body
@@ -51,19 +56,24 @@ const loginByEmail = async (req, res) => {
     if (!isValidPassword) return res.status(401).json({ message: 'Invalid email or password' })
 
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     )
 
-    res.status(200).json({ message: 'Login successful', token, userId: user._id })
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      userId: user._id,
+      role: user.role
+    })
 
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error: error.message })
   }
 }
 
-// Google login
+// GOOGLE LOGIN
 const googleByLogin = async (req, res) => {
   try {
     const { token } = req.body
@@ -76,29 +86,40 @@ const googleByLogin = async (req, res) => {
     const payload = ticket.getPayload()
     const { name, email, picture } = payload
 
-    // Find or create user
     let user = await User.findOne({ email })
     if (!user) {
-      user = new User({ name, email, password: 'google-auth', profilePic: picture })
+      user = new User({
+        name,
+        email,
+        password: 'google-auth',
+        profilePic: picture,
+        role: 'user' // default role
+      })
       await user.save()
     }
 
     const authToken = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     )
 
     res.status(200).json({
-      user: { name: user.name, email: user.email, profilePic: user.profilePic },
+      user: {
+        name: user.name,
+        email: user.email,
+        profilePic: user.profilePic,
+        role: user.role
+      },
       token: authToken,
-      message: 'Login success',
+      message: 'Login success'
     })
   } catch (err) {
     console.error('OAuth Error:', err)
     res.status(401).json({ message: 'Unauthorized' })
   }
 }
+
 
 // Forgot Password controller
 const forgotPassword = async (req, res) => {

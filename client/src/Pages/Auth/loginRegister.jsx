@@ -6,6 +6,13 @@ import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../context/authContext';
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from '../../Components/ui/select';
 
 const AuthForms = () => {
     const [formValues, setFormValues] = useState({
@@ -14,6 +21,7 @@ const AuthForms = () => {
         password: '',
         confirmPassword: '',
         token: '',
+        role: '',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,7 +52,7 @@ const AuthForms = () => {
 
     useEffect(() => {
         if (isResetPassword) {
-            toast('This reset page may have opened in a new tab. If you were previously logged in, no worries — just set your new password here.', {
+            toast('This reset page may have opened in a new tab.', {
                 duration: 5000,
                 position: 'top-center',
             });
@@ -56,12 +64,16 @@ const AuthForms = () => {
         setFormValues((prev) => ({ ...prev, [name]: value }));
     };
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             if (isRegister) {
+                if (!formValues.role) {
+                    toast.error('Please select a role');
+                    return;
+                }
+
                 if (formValues.password !== formValues.confirmPassword) {
                     toast.error('Passwords do not match');
                     return;
@@ -71,6 +83,7 @@ const AuthForms = () => {
                     email: formValues.email,
                     password: formValues.password,
                     name: formValues.fullName,
+                    role: formValues.role,
                 });
 
                 localStorage.setItem('token', res.data.token);
@@ -81,9 +94,15 @@ const AuthForms = () => {
             }
 
             if (isLogin) {
+                if (!formValues.role) {
+                    toast.error('Please select a role');
+                    return;
+                }
+
                 const res = await axios.post(`${PORT}/api/auth/login`, {
                     email: formValues.email,
                     password: formValues.password,
+                    role: formValues.role,
                 });
 
                 localStorage.setItem('token', res.data.token);
@@ -119,7 +138,7 @@ const AuthForms = () => {
                     token: formValues.token,
                 });
 
-                toast.success(res.data.message || 'Password reset successful! Redirecting...');
+                toast.success(res.data.message || 'Password reset successful!');
                 setTimeout(() => (window.location.href = '/login?mode=signin'), 1500);
             }
         } catch (err) {
@@ -149,12 +168,6 @@ const AuthForms = () => {
                         {isResetPassword && 'Set a new password for your account'}
                     </p>
                 </div>
-                {isResetPassword && (
-                    <div className="mt-2 text-[12px] m-5 text-orange-600 bg-orange-100 rounded-lg px-4 py-2">
-                        This reset page may have opened in a new tab. If you were previously logged in, no worries — just set your new password here.
-                    </div>
-                )}
-
 
                 <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 backdrop-blur-sm">
                     {(isLogin || isRegister) && (
@@ -167,12 +180,9 @@ const AuthForms = () => {
                                                 token: credentialResponse.credential,
                                             });
 
-                                            console.log("Google login response:", res.data); // ✅ log before redirect
-
                                             localStorage.setItem('token', res.data.token);
-                                            localStorage.setItem('email', res.data.user.email)
+                                            localStorage.setItem('email', res.data.user.email);
                                             toast.success('Logged in with Google!');
-
                                             setTimeout(() => {
                                                 window.location.href = '/';
                                             }, 1500);
@@ -182,8 +192,8 @@ const AuthForms = () => {
                                         }
                                     }}
                                 />
-
                             </div>
+
                             <div className="relative mb-6">
                                 <div className="absolute inset-0 flex items-center">
                                     <div className="w-full border-t border-gray-200"></div>
@@ -195,7 +205,27 @@ const AuthForms = () => {
                         </>
                     )}
 
+
                     <form onSubmit={handleSubmit} className="space-y-5">
+
+                        {(isLogin || isRegister) && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-zinc-800 capitalize">Select Role</label>
+                                <Select
+                                    value={formValues.role}
+                                    onValueChange={(val) => setFormValues((prev) => ({ ...prev, role: val }))}
+                                >
+                                    <SelectTrigger className="w-full border-2 rounded-xl border-gray-200 text-black">
+                                        <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="user">User</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
                         {isRegister && (
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-zinc-800 capitalize">Full Name</label>

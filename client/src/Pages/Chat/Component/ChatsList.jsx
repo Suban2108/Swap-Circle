@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React,{ useEffect, useState } from "react"
 import { Search, ArrowLeft, Plus, UserPlus, Users } from "lucide-react"
 import CreateGroupModal from "../Component/CreateGroupModal"
 import JoinGroupModal from "../Component/JoinGroupModal"
 import { useAuth } from "../../../context/authContext"
 import { chatAPI } from "../../../lib/api/ChatApi.js"
+import { Skeleton } from "../../../Components/ui/skeleton"
 
 const ChatList = ({
   list = [],
@@ -28,11 +29,10 @@ const ChatList = ({
   const { PORT } = useAuth()
   const [groupDetailsMap, setGroupDetailsMap] = useState({})
 
-  // Prefetch group details and cache them
   useEffect(() => {
     const fetchAllGroupDetails = async () => {
       const newMap = { ...groupDetailsMap }
-      const groupItems = list.filter(item => item?.type === "group")
+      const groupItems = list.filter((item) => item?.type === "group")
 
       for (const item of groupItems) {
         const groupId = item.groupId || item._id
@@ -54,7 +54,6 @@ const ChatList = ({
     }
   }, [list])
 
-  // Helper function to get avatar URL
   const getItemAvatarUrl = (item) => {
     const isGroupChat = item?.type === "group"
     let avatar = item?.avatar
@@ -98,8 +97,25 @@ const ChatList = ({
       : date.toLocaleDateString()
   }
 
-  const filteredList = list.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredList = list.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
+  const renderChatListSkeleton = () => (
+    <div className="p-2 space-y-2">
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className="p-3 rounded-xl bg-white/50 dark:bg-slate-800/50">
+          <div className="flex items-center space-x-3">
+            <Skeleton className="w-12 h-12 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 
   const renderAvatar = (item, isSelected) => {
@@ -109,18 +125,19 @@ const ChatList = ({
 
     return (
       <div
-        className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold ${isSelected ? "bg-white/20 text-white" : "bg-gradient-to-br from-blue-500 to-orange-500 text-white"
-          } relative flex-shrink-0 overflow-hidden`}
+        className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold ${
+          isSelected ? "bg-white/20 text-white" : "bg-gradient-to-br from-blue-500 to-orange-500 text-white"
+        } relative flex-shrink-0 overflow-hidden`}
       >
         {avatarUrl ? (
           <img
-            src={avatarUrl}
+            src={avatarUrl || "/placeholder.svg"}
             alt={displayName}
             className="w-full h-full rounded-full object-cover border-2 border-orange-500"
             onError={(e) => {
               e.target.style.display = "none"
               const parent = e.target.parentElement
-              if (parent && !parent.querySelector('.avatar-fallback')) {
+              if (parent && !parent.querySelector(".avatar-fallback")) {
                 const fallbackDiv = document.createElement("div")
                 fallbackDiv.className = "avatar-fallback w-full h-full flex items-center justify-center"
                 fallbackDiv.innerHTML = isGroup
@@ -168,13 +185,14 @@ const ChatList = ({
 
   return (
     <>
-            {isMobileListOpen && (
+      {isMobileListOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 mt-20 z-40 md:hidden" onClick={onCloseMobileList} />
       )}
 
       <div
-        className={`fixed md:relative top-0 left-0 z-50 md:z-auto h-full w-full sm:w-80 md:w-80 flex-shrink-0 flex flex-col bg-gradient-to-b from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-900 border-r border-blue-200 dark:border-blue-800 transform transition-transform duration-300 ease-in-out ${isMobileListOpen ? "translate-x-0 mt-15" : "-translate-x-full md:translate-x-0"
-          }`}
+        className={`fixed md:relative top-0 left-0 z-50 md:z-auto h-full w-full sm:w-80 md:w-80 flex-shrink-0 flex flex-col bg-gradient-to-b from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-900 border-r border-blue-200 dark:border-blue-800 transform transition-transform duration-300 ease-in-out ${
+          isMobileListOpen ? "translate-x-0 mt-15" : "-translate-x-full md:translate-x-0"
+        }`}
       >
         <div className="p-4 border-b border-blue-200 dark:border-blue-800">
           <div className="flex items-center justify-between mb-3">
@@ -242,13 +260,11 @@ const ChatList = ({
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-            </div>
+            renderChatListSkeleton()
           ) : filteredList.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+            <div className="text-center py-8 text-slate-500 dark:text-slate-400 px-4">
               {searchTerm ? (
                 "No results found"
               ) : (
@@ -275,50 +291,56 @@ const ChatList = ({
               )}
             </div>
           ) : (
-            filteredList.map((item, index) => {
-              console.log(`=== Rendering list item ${index} ===`)
-              console.log("Item:", item)
+            <div className="p-2 space-y-1">
+              {filteredList.map((item, index) => {
+                console.log(`=== Rendering list item ${index} ===`)
+                console.log("Item:", item)
 
-              const isSelected = selectedId === item._id
-              console.log("Is selected:", isSelected)
+                const isSelected = selectedId === item._id
+                console.log("Is selected:", isSelected)
 
-              return (
-                <div
-                  key={item._id}
-                  onClick={() => {
-                    console.log("Clicked on item:", item)
-                    onSelect(item)
-                    if (onCloseMobileList) onCloseMobileList()
-                  }}
-                  className={`p-3 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] touch-manipulation ${isSelected
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg transform scale-[1.02]"
-                      : "hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white hover:shadow-md bg-white/50 dark:bg-slate-800/50"
+                return (
+                  <div
+                    key={item._id}
+                    onClick={() => {
+                      console.log("Clicked on item:", item)
+                      onSelect(item)
+                      if (onCloseMobileList) onCloseMobileList()
+                    }}
+                    className={`p-3 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] touch-manipulation ${
+                      isSelected
+                        ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg transform scale-[1.02]"
+                        : "hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white hover:shadow-md bg-white/50 dark:bg-slate-800/50"
                     }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    {renderAvatar(item, isSelected)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      {renderAvatar(item, isSelected)}
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold truncate text-sm sm:text-base">{item.name}</div>
-                        <div className="text-xs opacity-70 flex-shrink-0 ml-2">{formatTime(item.timestamp)}</div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm opacity-70 truncate pr-2">{item.lastMessage || "No messages yet"}</div>
-                        {item.unread > 0 && (
-                          <div
-                            className={`flex-shrink-0 px-2 py-1 rounded-full text-xs font-bold ${isSelected ? "bg-white/20 text-white" : "bg-red-500 text-white"
-                              }`}
-                          >
-                            {item.unread}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold truncate text-sm sm:text-base">{item.name}</div>
+                          <div className="text-xs opacity-70 flex-shrink-0 ml-2">{formatTime(item.timestamp)}</div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm opacity-70 truncate pr-2">
+                            {item.lastMessage || "No messages yet"}
                           </div>
-                        )}
+                          {item.unread > 0 && (
+                            <div
+                              className={`flex-shrink-0 px-2 py-1 rounded-full text-xs font-bold ${
+                                isSelected ? "bg-white/20 text-white" : "bg-red-500 text-white"
+                              }`}
+                            >
+                              {item.unread}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })
+                )
+              })}
+            </div>
           )}
         </div>
       </div>

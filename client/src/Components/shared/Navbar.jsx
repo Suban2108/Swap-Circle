@@ -220,7 +220,7 @@ const AwesomeNavbar = () => {
                     <img
                       src={userData ? `${PORT}${userData.avatar}` : default_user_image}
                       alt="Profile"
-                      className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-2 ring-blue-500' : ''
+                      className={`w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105 ${location.pathname.includes('/dashboard') || location.pathname.includes('/profile') ? 'ring-4 ring-blue-400' : ''
                         }`}
                       onError={(e) => {
                         e.target.src = default_user_image;

@@ -3,7 +3,7 @@ import {
   User, Mail, MapPin, Calendar, Star, Package, Award,
   Clock, Settings, Camera, Save, X, Edit, Share2, Upload,
   CheckCircle, Globe, Instagram, Twitter, Facebook,
-  LayoutDashboard
+  LayoutDashboard, ShieldUser
 } from "lucide-react"
 import { Skeleton } from "../../Components/ui/skeleton"
 import SettingFeatures from "./UserComponent/Settings"
@@ -138,6 +138,7 @@ export default function UserProfile() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [showCropper, setShowCropper] = useState(false)
   const [imageToCrop, setImageToCrop] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(null)
 
   const { PORT, userId } = useAuth()
   const USER_ID = userId || localStorage.getItem("userId")
@@ -267,13 +268,18 @@ export default function UserProfile() {
       <div className="max-w-4xl mx-auto px-4 -mt-20 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex items-start space-x-6">
-            {/* Avatar */}
+            {/* Avatar and Admin Badge */}
             <div className="relative">
               <img
                 src={`${PORT}${userData.avatar}`}
                 alt="Avatar"
                 className="w-32 h-32 object-cover rounded-full border-4 border-purple-500 shadow-md"
               />
+              {userData.role === 'admin' && (
+                <div className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full p-1 shadow-md" title="Admin">
+                  <ShieldUser className="w-5 h-5" />
+                </div>
+              )}
               <button
                 onClick={() => setShowImageUpload(true)}
                 className="absolute bottom-0 left-0 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center"
@@ -449,6 +455,7 @@ export default function UserProfile() {
               )}
             </div>
           </div>
+
         </div>
       </div>
 
