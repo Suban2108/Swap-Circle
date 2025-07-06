@@ -30,7 +30,7 @@ const AwesomeNavbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
 
-  const { PORT } = useAuth()
+  const { PORT, userId } = useAuth()
   const location = useLocation()
 
   useEffect(() => {
@@ -40,15 +40,13 @@ const AwesomeNavbar = () => {
   }, [])
 
   useEffect(() => {
-    const userId = Cookies.get('userId')
-
     if (userId) {
       setIsLoggedIn(true)
       fetchUser(userId)
     } else {
       setIsLoggedIn(false)
     }
-  }, [])
+  }, [userId])
 
   const fetchUser = async (userId) => {
     try {
