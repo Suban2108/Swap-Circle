@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { X, ArrowRightLeft, Plus, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/Components/ui/button"
+import { Card, CardContent } from "@/Components/ui/card"
+import { Badge } from "@/Components/ui/badge"
+import { Textarea } from "@/Components/ui/textarea"
 import { useUserItems } from "../../../hooks/UseItem"
 import { itemsAPI } from "../../../lib/api/ItemApi"
 

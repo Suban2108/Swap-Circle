@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react"
 import { Plus, Grid3X3, List, Filter } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/Components/ui/button"
 import SearchFilterBar from "./Components/SearchFilterBar"
 import ItemCard from "./Components/ItemCard"
 import SwapModal from "./Components/SwapModal"

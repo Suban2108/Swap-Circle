@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/Components/ui/badge"
+import { Button } from "@/Components/ui/button"
 import {
     Card, CardContent, CardFooter, CardHeader, CardTitle
-} from "@/components/ui/card"
+} from "@/Components/ui/card"
 import {
     CalendarDays, MapPin, Users, Clock, Award, Eye, UserPlus, UserMinus,
     Trash, ChevronDown, MoreVertical

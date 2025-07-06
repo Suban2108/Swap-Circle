@@ -1,8 +1,8 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog"
+import { Button } from "@/Components/ui/button"
+import { Badge } from "@/Components/ui/badge"
 import { CalendarDays, Clock, MapPin, Users, Award, Mail, Phone, Globe, X } from "lucide-react"
 
 export default function EventDetailModal({ event, isOpen, onClose }) {

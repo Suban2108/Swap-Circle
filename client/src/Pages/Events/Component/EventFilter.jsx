@@ -1,9 +1,9 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/Components/ui/button"
+import { Input } from "@/Components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/Components/ui/select"
+import { Badge } from "@/Components/ui/badge"
 import { X, Search, Filter } from "lucide-react"
 
 export function EventFilters({ filters, onFiltersChange, onClearFilters }) {
