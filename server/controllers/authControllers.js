@@ -17,10 +17,10 @@ const transporter = nodemailer.createTransport({
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: true, // <--- only for local testing, use true in prod
+  sameSite: 'None',
   maxAge: 24 * 60 * 60 * 1000,
-}
+};
 
 // REGISTER
 const registerByEmail = async (req, res) => {
@@ -41,10 +41,14 @@ const registerByEmail = async (req, res) => {
 
     console.log("[Register] Token:", token)
 
-    res.cookie("token", token, COOKIE_OPTIONS)
+    res.cookie("token", token, {
+      COOKIE_OPTIONS,
+      domain: '.onrender.com',
+    })
     res.cookie("userId", user._id.toString(), {
       ...COOKIE_OPTIONS,
       httpOnly: false,
+      domain: '.onrender.com',
     })
 
     res.status(201).json({
@@ -75,17 +79,20 @@ const loginByEmail = async (req, res) => {
       { expiresIn: '24h' }
     )
 
-    res.cookie("token", token, COOKIE_OPTIONS)
+    res.cookie("token", token, {COOKIE_OPTIONS,
+      domain: '.onrender.com',
+    })
     res.cookie("userId", user._id.toString(), {
       ...COOKIE_OPTIONS,
       httpOnly: false,
+      domain: '.onrender.com',
     })
 
     res.status(200).json({
       message: 'Login successful',
       userId: user._id,
       role: user.role,
-      Token:token
+      Token: token
     })
 
   } catch (error) {
@@ -124,10 +131,13 @@ const googleByLogin = async (req, res) => {
       { expiresIn: '24h' }
     )
 
-    res.cookie("token", authToken, COOKIE_OPTIONS)
+    res.cookie("token", authToken, {COOKIE_OPTIONS,
+      domain: '.onrender.com',
+    })
     res.cookie("userId", user._id.toString(), {
       ...COOKIE_OPTIONS,
       httpOnly: false,
+      domain: '.onrender.com',
     })
 
     res.status(200).json({
@@ -147,10 +157,13 @@ const googleByLogin = async (req, res) => {
 
 // LOGOUT
 const logoutUser = (req, res) => {
-  res.clearCookie("token", COOKIE_OPTIONS)
+  res.clearCookie("token", {COOKIE_OPTIONS,
+      domain: '.onrender.com',
+  })
   res.clearCookie("userId", {
     ...COOKIE_OPTIONS,
     httpOnly: false,
+      domain: '.onrender.com',
   })
 
   res.status(200).json({ message: "Logged out successfully" })

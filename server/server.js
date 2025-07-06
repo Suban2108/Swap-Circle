@@ -18,7 +18,7 @@ import messageRouter from "./routes/messageRoutes.js"
 import errorHandler from "./middleware/errorHandlerMiddleware.js"
 
 import 'dotenv/config'
-import { log } from "console";
+
 
 
 //app config
@@ -26,12 +26,12 @@ const app = express();
 
 const PORT = process.env.PORT || 5005;
 
+const allowedOrigins = ['https://swap-circle-frontend.onrender.com'];
 
-//middleware
 app.use(cors({
-  origin: 'https://swap-circle-frontend.onrender.com',
-  credentials: true, // 👈 allows cookies to be sent
-}))
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
