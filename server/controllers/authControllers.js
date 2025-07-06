@@ -17,10 +17,11 @@ const transporter = nodemailer.createTransport({
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: true, // <--- only for local testing, use true in prod
-  sameSite: 'None',
+  secure: process.env.NODE_ENV === "production", // ⛔ false if NODE_ENV is not set
+  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   maxAge: 24 * 60 * 60 * 1000,
-};
+}
+
 
 // REGISTER
 const registerByEmail = async (req, res) => {
@@ -79,7 +80,8 @@ const loginByEmail = async (req, res) => {
       { expiresIn: '24h' }
     )
 
-    res.cookie("token", token, {COOKIE_OPTIONS,
+    res.cookie("token", token, {
+      COOKIE_OPTIONS,
       domain: '.onrender.com',
     })
     res.cookie("userId", user._id.toString(), {
@@ -94,6 +96,14 @@ const loginByEmail = async (req, res) => {
       role: user.role,
       Token: token
     })
+
+    console.log({
+      message: 'Login successful',
+      userId: user._id,
+      role: user.role,
+      Token: token
+    });
+
 
   } catch (error) {
     console.error("Login Error:", error)
@@ -131,7 +141,8 @@ const googleByLogin = async (req, res) => {
       { expiresIn: '24h' }
     )
 
-    res.cookie("token", authToken, {COOKIE_OPTIONS,
+    res.cookie("token", authToken, {
+      COOKIE_OPTIONS,
       domain: '.onrender.com',
     })
     res.cookie("userId", user._id.toString(), {
@@ -157,13 +168,14 @@ const googleByLogin = async (req, res) => {
 
 // LOGOUT
 const logoutUser = (req, res) => {
-  res.clearCookie("token", {COOKIE_OPTIONS,
-      domain: '.onrender.com',
+  res.clearCookie("token", {
+    COOKIE_OPTIONS,
+    domain: '.onrender.com',
   })
   res.clearCookie("userId", {
     ...COOKIE_OPTIONS,
     httpOnly: false,
-      domain: '.onrender.com',
+    domain: '.onrender.com',
   })
 
   res.status(200).json({ message: "Logged out successfully" })
