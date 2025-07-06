@@ -293,17 +293,13 @@ const ChatList = ({
           ) : (
             <div className="p-2 space-y-1">
               {filteredList.map((item, index) => {
-                console.log(`=== Rendering list item ${index} ===`)
-                console.log("Item:", item)
 
                 const isSelected = selectedId === item._id
-                console.log("Is selected:", isSelected)
 
                 return (
                   <div
                     key={item._id}
                     onClick={() => {
-                      console.log("Clicked on item:", item)
                       onSelect(item)
                       if (onCloseMobileList) onCloseMobileList()
                     }}

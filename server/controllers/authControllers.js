@@ -75,8 +75,6 @@ const loginByEmail = async (req, res) => {
       { expiresIn: '24h' }
     )
 
-    console.log("[Login] Token:", token)
-
     res.cookie("token", token, COOKIE_OPTIONS)
     res.cookie("userId", user._id.toString(), {
       ...COOKIE_OPTIONS,
@@ -86,7 +84,8 @@ const loginByEmail = async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       userId: user._id,
-      role: user.role
+      role: user.role,
+      Token:token
     })
 
   } catch (error) {
@@ -125,8 +124,6 @@ const googleByLogin = async (req, res) => {
       { expiresIn: '24h' }
     )
 
-    console.log("[Google Login] Token:", authToken)
-
     res.cookie("token", authToken, COOKIE_OPTIONS)
     res.cookie("userId", user._id.toString(), {
       ...COOKIE_OPTIONS,
@@ -156,7 +153,6 @@ const logoutUser = (req, res) => {
     httpOnly: false,
   })
 
-  console.log("[Logout] Cookies cleared")
   res.status(200).json({ message: "Logged out successfully" })
 }
 
@@ -184,7 +180,34 @@ const forgotPassword = async (req, res) => {
       to: user.email,
       from: process.env.EMAIL_FROM,
       subject: '🔐 Reset Your Password - Swap Circle',
-      html: `Click here to reset: <a href="${resetUrl}">Reset Password</a>`
+      html: `
+    <div style="font-family: sans-serif; line-height: 1.6; padding: 20px;">
+      <h2 style="color: #333;">Reset Your Password</h2>
+      <p>Hello ${user.name || "there"},</p>
+      <p>You requested to reset your password for your Swap Circle account.</p>
+      <p>
+        Click the button below to proceed:
+      </p>
+      <a href="${resetUrl}" style="
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #ff6a00;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-top: 10px;
+      ">Reset Password</a>
+      <p>If you didn’t request this, you can safely ignore this email.</p>
+      <p style="font-size: 0.9em; color: #888;">
+        This link will expire in 1 hour for your security.
+      </p>
+      <hr />
+      <p style="font-size: 0.8em; color: #aaa;">
+        &copy; ${new Date().getFullYear()} Swap Circle. All rights reserved.
+      </p>
+    </div>
+  `
     })
 
     res.status(200).json({ message: 'A reset link has been sent to your email.' })

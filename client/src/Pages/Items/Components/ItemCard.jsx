@@ -1,3 +1,4 @@
+// ItemCard.jsx
 "use client"
 
 import { useState } from "react"
@@ -29,15 +30,20 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { itemsAPI } from "../../../lib/api/ItemApi"
+import { useAuth } from "@/context/authContext"
 
 const ItemCard = ({ item, onSwapRequest, onContact, onEdit, onDelete, isOwner = false, loading = false }) => {
+  const { userId } = useAuth()
+
   const [isLiked, setIsLiked] = useState(
-    item?.likes?.some((like) => like.userId === localStorage.getItem("userId")) || false
+    item?.likes?.some((like) => like.userId === userId) || false
   )
   const [likeCount, setLikeCount] = useState(item?.likes?.length || 0)
   const [imageLoading, setImageLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  
 
   if (loading) {
     return (
@@ -88,6 +94,14 @@ const ItemCard = ({ item, onSwapRequest, onContact, onEdit, onDelete, isOwner = 
     } catch (error) {
       console.error("Failed to toggle like:", error)
     }
+  }
+
+  const handleEditClick = () => {
+    onEdit?.(item._id)
+  }
+
+  const handleDeleteClick = () => {
+    onDelete?.(item._id)
   }
 
   const getStatusColor = (status) => {
@@ -154,9 +168,8 @@ const ItemCard = ({ item, onSwapRequest, onContact, onEdit, onDelete, isOwner = 
             <img
               src={getImageSrc(currentImageIndex)}
               alt={item.title}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                imageLoading ? "opacity-0" : "opacity-100"
-              }`}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoading ? "opacity-0" : "opacity-100"
+                }`}
               onLoad={handleImageLoad}
               onError={handleImageError}
             />
@@ -229,11 +242,11 @@ const ItemCard = ({ item, onSwapRequest, onContact, onEdit, onDelete, isOwner = 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit?.(item)}>
+                <DropdownMenuItem onClick={handleEditClick}>
                   <Edit3 className="w-4 h-4 mr-2" /> Edit Item
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => onDelete?.(item._id)}
+                  onClick={handleDeleteClick}
                   className="text-red-600 focus:text-red-600"
                 >
                   <Trash2 className="w-4 h-4 mr-2" /> Delete Item
@@ -247,9 +260,8 @@ const ItemCard = ({ item, onSwapRequest, onContact, onEdit, onDelete, isOwner = 
         <Button
           variant="secondary"
           size="sm"
-          className={`absolute bottom-3 left-3 bg-white/90 hover:bg-white ${
-            isLiked ? "text-red-500" : "text-gray-600"
-          }`}
+          className={`absolute bottom-3 left-3 bg-white/90 hover:bg-white ${isLiked ? "text-red-500" : "text-gray-600"
+            }`}
           onClick={handleLikeClick}
         >
           <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />

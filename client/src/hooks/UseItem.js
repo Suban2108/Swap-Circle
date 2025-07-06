@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { itemsAPI } from "../lib/api/ItemApi"
 import toast from "react-hot-toast"
+import { useAuth } from "@/context/authContext"
 
 export const useItems = () => {
   const [items, setItems] = useState([])
@@ -13,6 +14,7 @@ export const useItems = () => {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { userId } = useAuth()
 
   const fetchItems = useCallback(async (searchParams = {}, page = 1, limit = 20, sort = "newest") => {
     setLoading(true)
@@ -91,17 +93,17 @@ export const useItems = () => {
       setItems((prev) =>
         prev.map((item) => {
           if (item._id === id) {
-            const userId = localStorage.getItem("userId")
+            const userID = userId
             let updatedLikes = [...(item.likes || [])]
 
             if (result.liked) {
               // Add like if not already present
-              if (!updatedLikes.some((like) => like.userId === userId)) {
-                updatedLikes.push({ userId, likedAt: new Date() })
+              if (!updatedLikes.some((like) => like.userID === userID)) {
+                updatedLikes.push({ userID, likedAt: new Date() })
               }
             } else {
               // Remove like
-              updatedLikes = updatedLikes.filter((like) => like.userId !== userId)
+              updatedLikes = updatedLikes.filter((like) => like.userID !== userID)
             }
 
             return { ...item, likes: updatedLikes }
@@ -146,7 +148,7 @@ export const useItems = () => {
   }
 }
 
-export const useUserItems = (userId) => {
+export const useUserItems = (userID) => {
   const [userItems, setUserItems] = useState([])
   const [pagination, setPagination] = useState({
     current: 1,
@@ -158,12 +160,12 @@ export const useUserItems = (userId) => {
 
   const fetchUserItems = useCallback(
     async (includeRemoved = false, page = 1, limit = 20) => {
-      if (!userId) return
+      if (!userID) return
 
       setLoading(true)
       setError(null)
       try {
-        const result = await itemsAPI.getItemsByUser(userId, includeRemoved, page, limit)
+        const result = await itemsAPI.getItemsByUser(userID, includeRemoved, page, limit)
 
         // Handle both paginated and non-paginated responses
         if (result.items && result.pagination) {
@@ -184,7 +186,7 @@ export const useUserItems = (userId) => {
         setLoading(false)
       }
     },
-    [userId],
+    [userID],
   )
 
   useEffect(() => {

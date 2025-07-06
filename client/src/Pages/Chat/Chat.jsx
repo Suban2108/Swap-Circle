@@ -1,34 +1,47 @@
 "use client"
 
-import React,{ useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import ChatContainer from "./Component/chatContainer"
 import { useAuth } from "../../context/authContext"
 import { Skeleton } from "../../Components/ui/skeleton"
+import axios from 'axios'
 
 export default function ChatPage() {
-  const [userId, setUserId] = useState("")
-  const [token, setToken] = useState("")
-  const [apiUrl, setApiUrl] = useState("")
-  const { PORT } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [userData, setUserData] = useState(null) // <-- NEW
+  const { PORT, userId } = useAuth()
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId")
-    const storedToken = localStorage.getItem("token")
-    const storedApiUrl = PORT
+    const fetchUser = async () => {
+      try {
+        if (userId) {
+          console.log("[ChatPage] userId from context:", userId)
+          setLoading(false)
+          return
+        }
 
-    console.log("ChatPage: Auth data:", { storedUserId, storedToken, storedApiUrl })
+        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
+          withCredentials: true,
+        })
 
-    if (storedUserId && storedToken) {
-      setUserId(storedUserId)
-      setToken(storedToken)
-      setApiUrl(storedApiUrl)
-    } else {
-      console.log("ChatPage: Missing auth data, redirecting to login")
-      window.location.href = "/login"
+        console.log("[ChatPage] Data fetched from cookie-based auth:", data.avatar)
+
+        if (data && data._id) {
+          setUserData(data)
+          setLoading(false)
+        } else {
+          throw new Error("User not found in response")
+        }
+      } catch (error) {
+        console.error("Auth failed. Redirecting to login...", error)
+        window.location.href = "/login"
+      }
     }
-  }, [PORT])
 
-  if (!userId || !token) {
+    fetchUser()
+  }, [PORT, userId])
+
+  if (loading || (!userId && !userData)) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950">
         <div className="w-full max-w-4xl mx-auto p-4">
@@ -66,7 +79,6 @@ export default function ChatPage() {
 
             {/* Main Chat Window Skeleton */}
             <div className="flex-1 flex flex-col">
-              {/* Header Skeleton */}
               <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-950">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -84,7 +96,6 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              {/* Messages Skeleton */}
               <div className="flex-1 p-4 space-y-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
@@ -99,7 +110,6 @@ export default function ChatPage() {
                 ))}
               </div>
 
-              {/* Input Skeleton */}
               <div className="p-4 border-t border-slate-200 dark:border-slate-700">
                 <div className="flex items-center space-x-3">
                   <Skeleton className="w-10 h-10 rounded-full" />
@@ -110,9 +120,16 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
+        <div className="text-gray-500 text-sm">Loading chat...</div>
       </div>
     )
   }
 
-  return <ChatContainer userId={userId} apiUrl={apiUrl} token={token} />
+  return (
+    <ChatContainer
+      userId={userId || userData?._id}
+      apiURL={PORT}
+      user={userData}
+    />
+  )
 }

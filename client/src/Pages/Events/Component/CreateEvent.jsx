@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { X, Plus, Loader2, Calendar, MapPin, Users, Award } from "lucide-react"
+import { X, Plus, Loader2, Calendar, MapPin, Users, Award, AlertTriangle } from "lucide-react"
 import { apiClient } from "@/lib/api/EventAPi"
 import { useToast } from "@/Components/shared/Toast"
 
 export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
+  const [confirmationChecked, setConfirmationChecked] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -459,6 +460,28 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                 </div>
               </div>
             </div>
+            {/* Main confirmation section */}
+            <div className="bg-red-100 border-2 border-dashed border-red-400 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="h-[20px] w-[20px] text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      id="confirmation"
+                      type="checkbox"
+                      checked={confirmationChecked}
+                      onChange={(e) => setConfirmationChecked(e.target.checked)}
+                      className="mt-0.5 h-[17px] w-[17px] text-red-600 border-red-300 rounded focus:ring-red-500"
+                      required
+                    />
+                    <label htmlFor="confirmation" className="text-[11px] text-red-800 leading-relaxed cursor-pointer">
+                      <strong className="font-semibold">This event cannot be edited after submission.</strong>
+                      <span className="text-red-700">Please review all details carefully before continuing.</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
 
@@ -476,7 +499,10 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             type="submit"
             disabled={loading}
             onClick={handleSubmit}
-            className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            className={`flex-1 px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${confirmationChecked
+              ? 'bg-gradient-to-r from-orange-500 to-amber-500 hover:bg-red-700 focus:ring-red-500'
+              : 'bg-gray-400 cursor-not-allowed'
+              }`}
           >
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Create Event

@@ -19,10 +19,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { itemsAPI } from "../../../lib/api/ItemApi"
+import { useAuth } from "@/context/authContext"
 
-const ItemList = ({ item, onEdit, onDelete, onSwapRequest, onContact, isOwner = false, loading = false }) => {
+const ItemList = ({ item, onEdit, onDelete, onSwapRequest, onContact, isOwner = false, loading = false, setConfirmOpen }) => {
+  const { userId } = useAuth()
+
   const [isLiked, setIsLiked] = useState(
-    item?.likes?.some((like) => like.userId === localStorage.getItem("userId")) || false
+    item?.likes?.some((like) => like.userId === userId) || false
   )
   const [likeCount, setLikeCount] = useState(item?.likes?.length || 0)
 
@@ -77,9 +80,8 @@ const ItemList = ({ item, onEdit, onDelete, onSwapRequest, onContact, isOwner = 
           size="sm"
           variant="ghost"
           onClick={handleLikeClick}
-          className={`absolute bottom-1 left-1 bg-white/90 p-1 rounded-full ${
-            isLiked ? "text-red-500" : "text-gray-500"
-          }`}
+          className={`absolute bottom-1 left-1 bg-white/90 p-1 rounded-full ${isLiked ? "text-red-500" : "text-gray-500"
+            }`}
         >
           <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
           {likeCount > 0 && <span className="ml-1 text-xs">{likeCount}</span>}
@@ -98,7 +100,7 @@ const ItemList = ({ item, onEdit, onDelete, onSwapRequest, onContact, isOwner = 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit?.(item)}>
+                <DropdownMenuItem onClick={() => onEdit?.(item._id)}>
                   <Edit3 className="w-4 h-4 mr-2" />
                   Edit
                 </DropdownMenuItem>

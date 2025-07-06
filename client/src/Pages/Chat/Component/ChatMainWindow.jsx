@@ -51,15 +51,6 @@ const ChatMainWindow = ({
   const [groupDetails, setGroupDetails] = useState(null)
 
   useEffect(() => {
-    console.log("=== ChatMainWindow Debug ===")
-    console.log("Selected Chat:", selectedChat)
-    console.log("Selected Chat Avatar:", selectedChat?.avatar)
-    console.log("Selected Chat Type:", selectedChat?.type)
-    console.log("Messages:", messages)
-    console.log("===========================")
-  }, [selectedChat, messages])
-
-  useEffect(() => {
     const fetchGroupDetailsOnSelect = async () => {
       if (selectedChat?.type === "group" && (selectedChat.groupId || selectedChat._id)) {
         const groupId = selectedChat.groupId || selectedChat._id
@@ -86,7 +77,6 @@ const ChatMainWindow = ({
 
     setIsUploading(true)
     try {
-      console.log("Sending file:", selectedFile)
       await onSendFile(selectedFile, message.trim())
       setSelectedFile(null)
       setFilePreview(null)
@@ -110,7 +100,6 @@ const ChatMainWindow = ({
     const file = e.target.files?.[0]
     if (!file) return
 
-    console.log("File selected:", file)
     setSelectedFile(file)
 
     if (file.type.startsWith("image/")) {
@@ -177,19 +166,15 @@ const ChatMainWindow = ({
 
   const handleUpdateGroupInfo = async (groupId, updateData) => {
     try {
-      console.log("ChatMainWindow: Updating group info:", groupId, updateData)
-
       await onUpdateGroupInfo(groupId, updateData)
 
       if (onRefreshChat) {
-        console.log("ChatMainWindow: Refreshing chat data...")
         await onRefreshChat(selectedChat._id || selectedChat.groupId)
       }
 
       await fetchGroupDetails(groupId)
 
       toast.success("Group details updated successfully!")
-      console.log("ChatMainWindow: Group update completed")
     } catch (error) {
       console.error("ChatMainWindow: Error updating group:", error)
       toast.error("Failed to update group details")
@@ -199,9 +184,7 @@ const ChatMainWindow = ({
 
   const fetchGroupDetails = async (groupId) => {
     try {
-      console.log("Fetching group details for:", groupId)
       const details = await chatAPI.getCircleDetails(groupId)
-      console.log("Fetched group details:", details)
       setGroupDetails(details)
       return details
     } catch (error) {
@@ -221,7 +204,6 @@ const ChatMainWindow = ({
   }
 
   const handleDeleteMessage = (messageId) => {
-    console.log("Message deleted:", messageId)
 
     if (onDeleteMessage) {
       onDeleteMessage(messageId)
@@ -267,19 +249,11 @@ const ChatMainWindow = ({
   )
 
   const renderMessage = (msg) => {
-    console.log("Rendering message:", msg)
 
     const isMe = msg.senderId._id === currentUserId
     const isGroupChat = selectedChat?.type === "group"
 
     if (msg.messageType && msg.messageType !== "text" && msg.fileUrl) {
-      console.log("Rendering file message:", {
-        messageType: msg.messageType,
-        fileUrl: msg.fileUrl,
-        fileName: msg.fileName,
-        fileSize: msg.fileSize,
-      })
-
       return (
         <div key={msg._id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
           <div className={`max-w-[85%] sm:max-w-xs lg:max-w-md ${isMe ? "order-2" : "order-1"}`}>
@@ -301,7 +275,6 @@ const ChatMainWindow = ({
                         src={`${PORT}${msg.fileUrl}`}
                         alt={msg.fileName || "Image"}
                         className="max-w-full h-auto rounded-lg max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                        onLoad={() => console.log("✅ Image loaded successfully:", `${PORT}${msg.fileUrl}`)}
                         onError={(e) => {
                           console.error("❌ Image failed to load:", `${PORT}${msg.fileUrl}`)
                           e.target.style.display = "none"
@@ -365,7 +338,6 @@ const ChatMainWindow = ({
                       href={`${PORT}${msg.fileUrl}`}
                       download={msg.fileName}
                       className={`p-1 rounded-full hover:bg-opacity-20 hover:bg-white transition-colors`}
-                      onClick={() => console.log("Downloading file:", `${PORT}${msg.fileUrl}`)}
                     >
                       <Download className="w-4 h-4" />
                     </a>

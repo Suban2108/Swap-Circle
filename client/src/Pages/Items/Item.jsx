@@ -1,3 +1,4 @@
+// MarketplacePage.jsx
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -10,6 +11,9 @@ import CreateItemModal from "./Components/CreateItemModal"
 import { useItems } from "../../hooks/UseItem"
 import toast from "react-hot-toast"
 import ItemList from "./Components/ItemList"
+import { useAuth } from "@/context/authContext"
+import ConfirmDialog from "@/components/shared/ConfirmDialog"
+import UpdateItemModal from "./Components/UpdateModal"
 
 const MarketplacePage = () => {
     const [viewMode, setViewMode] = useState("grid")
@@ -19,11 +23,16 @@ const MarketplacePage = () => {
     const [searchParams, setSearchParams] = useState({})
     const [sortOption, setSortOption] = useState("newest")
     const [currentPage, setCurrentPage] = useState(1)
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [showUpdateModal, setShowUpdateModal] = useState(false)
+    const [itemToDelete, setItemToDelete] = useState(null)
+    const [itemToEdit, setItemToEdit] = useState(null)
+    const { userId } = useAuth()
 
-    const { items, pagination, loading, error, fetchItems, createItem, deleteItem, toggleLike, createSwapRequest } =
+    const { items, pagination, loading, error, fetchItems, createItem, deleteItem, toggleLike, createSwapRequest, updateItem } =
         useItems()
 
-    const currentUserId = localStorage.getItem("userId") // Get from auth context
+    const currentUserId = userId;
 
     useEffect(() => {
         fetchItems(searchParams, currentPage, 20, sortOption)
@@ -58,18 +67,35 @@ const MarketplacePage = () => {
         try {
             await createItem(itemData, imageFiles)
             toast.success("Item created successfully!")
+            setShowCreateModal(false)
         } catch (error) {
             toast.error("Failed to create item")
         }
     }
 
     const handleDeleteItem = async (itemId) => {
-        if (window.confirm("Are you sure you want to delete this item?")) {
+        setItemToDelete(itemId)
+        setConfirmOpen(true)
+    }
+
+    const confirmDeleteItem = async () => {
+        if (itemToDelete) {
             try {
-                await deleteItem(itemId)
+                await deleteItem(itemToDelete)
+                toast.success("Item deleted successfully!")
             } catch (error) {
                 toast.error("Failed to delete item")
             }
+        }
+        setConfirmOpen(false)
+        setItemToDelete(null)
+    }
+
+    const handleEditItem = (itemId) => {
+        const item = items.find(i => i._id === itemId)
+        if (item) {
+            setItemToEdit(item)
+            setShowUpdateModal(true)
         }
     }
 
@@ -77,6 +103,7 @@ const MarketplacePage = () => {
         try {
             await createSwapRequest(swapData.requestedItemId, swapData.offeredItemId, swapData.message)
             toast.success("Swap request sent successfully!")
+            setShowSwapModal(false)
         } catch (error) {
             toast.error("Failed to send swap request")
         }
@@ -89,6 +116,18 @@ const MarketplacePage = () => {
             toast.error("Failed to like item")
         }
     }
+
+    const handleUpdateItem = async (id, itemData, imageFiles = [], removeImages = []) => {
+        try {
+            await updateItem(id, itemData, imageFiles, removeImages);
+            toast.success("Item updated successfully!");
+            setShowUpdateModal(false);
+            setItemToEdit(null);
+            fetchItems(searchParams, currentPage, 20, sortOption); // refresh item list
+        } catch (error) {
+            toast.error("Failed to update item");
+        }
+    };
 
     const renderItemsSkeleton = () => (
         <div
@@ -154,173 +193,209 @@ const MarketplacePage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 mt-16">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-orange-600 via-yellow-600 to-orange-800 text-white">
-                <div className="max-w-7xl mx-auto px-4 py-16">
-                    <div className="text-center">
-                        <h1 className="text-4xl md:text-6xl font-bold mb-4">Swap & Share</h1>
-                        <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                            Turn your unused items into treasures. Connect with your community through sustainable trading.
-                        </p>
-                        <Button
-                            size="lg"
-                            onClick={() => setShowCreateModal(true)}
-                            className="bg-white text-yellow-600 hover:bg-gray-300 text-lg px-8 py-3"
-                        >
-                            <Plus className="w-5 h-5 mr-2" />
-                            List Your First Item
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                {/* Search and Filters */}
-                <div className="mb-8">
-                    <SearchFilterBar onSearch={handleSearch} loading={loading} />
-                </div>
-
-                {/* Toolbar */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            {Object.keys(searchParams).length > 0 ? "Search Results" : "All Items"}
-                        </h2>
-                        {!loading && pagination && (
-                            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{pagination.total} items</span>
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center mr-4">
-                            <span className="text-sm text-gray-600 mr-2">Sort:</span>
-                            <select
-                                value={sortOption}
-                                onChange={(e) => handleSortChange(e.target.value)}
-                                className="text-sm border rounded-md px-2 py-1"
-                            >
-                                <option value="newest">Newest</option>
-                                <option value="oldest">Oldest</option>
-                                <option value="popular">Most Popular</option>
-                                <option value="price-low">Price: Low to High</option>
-                                <option value="price-high">Price: High to Low</option>
-                                <option value="alphabetical">A-Z</option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant={viewMode === "grid" ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setViewMode("grid")}
-                            >
-                                <Grid3X3 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                variant={viewMode === "list" ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setViewMode("list")}
-                            >
-                                <List className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                onClick={() => setShowCreateModal(true)}
-                                className="bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 ml-4"
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add Item
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Items Grid */}
-                {loading ? (
-                    renderItemsSkeleton()
-                ) : error ? (
-                    <div className="text-center py-12">
-                        <div className="text-red-500 mb-4">
-                            <Filter className="w-12 h-12 mx-auto mb-2" />
-                            <p className="text-lg font-medium">Error loading items</p>
-                            <p className="text-sm text-gray-600">{error}</p>
-                        </div>
-                        <Button onClick={() => fetchItems(searchParams, 1, 20, sortOption)} variant="outline">
-                            Try Again
-                        </Button>
-                    </div>
-                ) : items.length === 0 ? (
-                    <div className="text-center py-12">
-                        <div className="text-gray-500 mb-4">
-                            <Grid3X3 className="w-12 h-12 mx-auto mb-2" />
-                            <p className="text-lg font-medium">No items found</p>
-                            <p className="text-sm">
-                                {Object.keys(searchParams).length > 0
-                                    ? "Try adjusting your search filters"
-                                    : "Be the first to add an item!"}
+            <div className="mx-auto px-2 py-8 border border-red-500">
+                <div className="bg-gradient-to-r from-orange-600 via-yellow-600 to-orange-800 text-white rounded-2xl p-8 mb-8 mx-[85px]">
+                    <div className="flex justify-between items-center flex-wrap h-30">
+                        <div className="max-w-xl">
+                            <h1 className="text-4xl font-bold mb-2">Swap & Share</h1>
+                            <p className="text-orange-100 text-lg">
+                                Turn your unused items into treasures. Connect with your community through sustainable trading.
                             </p>
                         </div>
                         <Button
                             onClick={() => setShowCreateModal(true)}
-                            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                            className="bg-white text-yellow-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mt-4 md:mt-0"
                         >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add First Item
+                            <Plus className="h-5 w-5 mr-2" />
+                            List Your First Item
                         </Button>
                     </div>
-                ) : (
-                    <div
-                        className={`grid gap-6 ${viewMode === "grid"
+                </div>
+
+
+                {/* Main Content */}
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    {/* Search and Filters */}
+                    <div className="mb-8">
+                        <SearchFilterBar onSearch={handleSearch} loading={loading} />
+                    </div>
+
+                    {/* Toolbar */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-2xl font-bold text-gray-900">
+                                {Object.keys(searchParams).length > 0 ? "Search Results" : "All Items"}
+                            </h2>
+                            {!loading && pagination && (
+                                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{pagination.total} items</span>
+                            )}
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center mr-4">
+                                <span className="text-sm text-gray-600 mr-2">Sort:</span>
+                                <select
+                                    value={sortOption}
+                                    onChange={(e) => handleSortChange(e.target.value)}
+                                    className="text-sm border rounded-md px-2 py-1"
+                                >
+                                    <option value="newest">Newest</option>
+                                    <option value="oldest">Oldest</option>
+                                    <option value="popular">Most Popular</option>
+                                    <option value="price-low">Price: Low to High</option>
+                                    <option value="price-high">Price: High to Low</option>
+                                    <option value="alphabetical">A-Z</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant={viewMode === "grid" ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setViewMode("grid")}
+                                >
+                                    <Grid3X3 className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant={viewMode === "list" ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setViewMode("list")}
+                                >
+                                    <List className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 ml-4"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Item
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Items Grid */}
+                    {loading ? (
+                        renderItemsSkeleton()
+                    ) : error ? (
+                        <div className="text-center py-12">
+                            <div className="text-red-500 mb-4">
+                                <Filter className="w-12 h-12 mx-auto mb-2" />
+                                <p className="text-lg font-medium">Error loading items</p>
+                                <p className="text-sm text-gray-600">{error}</p>
+                            </div>
+                            <Button onClick={() => fetchItems(searchParams, 1, 20, sortOption)} variant="outline">
+                                Try Again
+                            </Button>
+                        </div>
+                    ) : items.length === 0 ? (
+                        <div className="text-center py-12">
+                            <div className="text-gray-500 mb-4">
+                                <Grid3X3 className="w-12 h-12 mx-auto mb-2" />
+                                <p className="text-lg font-medium">No items found</p>
+                                <p className="text-sm">
+                                    {Object.keys(searchParams).length > 0
+                                        ? "Try adjusting your search filters"
+                                        : "Be the first to add an item!"}
+                                </p>
+                            </div>
+                            <Button
+                                onClick={() => setShowCreateModal(true)}
+                                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:to-yellow-700"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add First Item
+                            </Button>
+                        </div>
+                    ) : (
+                        <div
+                            className={`grid gap-6 ${viewMode === "grid"
                                 ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                                 : "grid-cols-1 max-w-full"
-                            }`}
-                    >
-                        {items.map((item) =>
-                            viewMode === "grid" ? (
-                                <ItemCard
-                                    key={item._id}
-                                    item={item}
-                                    onSwapRequest={handleSwapRequest}
-                                    onContact={handleContact}
-                                    onDelete={handleDeleteItem}
-                                    isOwner={item.ownerId?._id === currentUserId}
-                                />
-                            ) : (
-                                <ItemList
-                                    key={item._id}
-                                    item={item}
-                                    onSwapRequest={handleSwapRequest}
-                                    onContact={handleContact}
-                                    onDelete={handleDeleteItem}
-                                    isOwner={item.ownerId?._id === currentUserId}
-                                />
-                            )
-                        )}
+                                }`}
+                        >
+                            {items.map((item) =>
+                                viewMode === "grid" ? (
+                                    <React.Fragment key={item._id}>
+                                        <ItemCard
+                                            item={item}
+                                            onSwapRequest={handleSwapRequest}
+                                            onContact={handleContact}
+                                            onDelete={handleDeleteItem}
+                                            onEdit={handleEditItem}
+                                            isOwner={item.ownerId?._id === currentUserId}
+                                        />
+                                        <UpdateItemModal
+                                            item={item} // ✅ fixed here
+                                            isOpen={showUpdateModal && itemToEdit?._id === item._id}
+                                            onClose={() => {
+                                                setShowUpdateModal(false);
+                                                setItemToEdit(null);
+                                            }}
+                                            onSubmit={handleUpdateItem}
+                                            loading={loading}
+                                        />
+                                    </React.Fragment>
+                                ) : (
+                                    <React.Fragment key={item._id}>
+                                        <ItemList
+                                            item={item}
+                                            onSwapRequest={handleSwapRequest}
+                                            onContact={handleContact}
+                                            onDelete={handleDeleteItem}
+                                            onEdit={handleEditItem}
+                                            isOwner={item.ownerId?._id === currentUserId}
+                                        />
+                                        <UpdateItemModal
+                                            item={item}
+                                            isOpen={showUpdateModal && itemToEdit?._id === item._id}
+                                            onClose={() => {
+                                                setShowUpdateModal(false);
+                                                setItemToEdit(null);
+                                            }}
+                                            onSubmit={handleUpdateItem}
+                                            loading={loading}
+                                        />
+                                    </React.Fragment>
+                                )
+                            )}
 
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                {/* Pagination */}
-                {!loading && items.length > 0 && renderPagination()}
+                    {/* Pagination */}
+                    {!loading && items.length > 0 && renderPagination()}
+                </div>
+
+                {/* Modals */}
+                <SwapModal
+                    isOpen={showSwapModal}
+                    onClose={() => {
+                        setShowSwapModal(false)
+                        setSelectedItem(null)
+                    }}
+                    selectedItem={selectedItem}
+                    currentUserId={currentUserId}
+                    onSwapRequest={handleSwapSubmit}
+                />
+
+                <CreateItemModal
+                    isOpen={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    onSubmit={handleCreateItem}
+                    loading={loading}
+                />
+
+                <ConfirmDialog
+                    open={confirmOpen}
+                    onCancel={() => {
+                        setConfirmOpen(false)
+                        setItemToDelete(null)
+                    }}
+                    onConfirm={confirmDeleteItem}
+                    message="Are you sure you want to delete this item? This action cannot be undone."
+                />
             </div>
-
-            {/* Modals */}
-            <SwapModal
-                isOpen={showSwapModal}
-                onClose={() => {
-                    setShowSwapModal(false)
-                    setSelectedItem(null)
-                }}
-                selectedItem={selectedItem}
-                currentUserId={currentUserId}
-                onSwapRequest={handleSwapSubmit}
-            />
-
-            <CreateItemModal
-                isOpen={showCreateModal}
-                onClose={() => setShowCreateModal(false)}
-                onSubmit={handleCreateItem}
-                loading={loading}
-            />
         </div>
     )
 }

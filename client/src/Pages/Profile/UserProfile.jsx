@@ -18,9 +18,8 @@ import toast from "react-hot-toast"
 import ImageCropper from "../../Components/shared/ImageCropper"
 import default_user_image from "../../assets/Default_user_image.jpeg"
 import default_banner_image from "../../assets/default_cover_banner_image.webp"
-
-import cropImageHelper from '../../Components/shared/cropImageLayout.js'
 import { Link } from "react-router-dom"
+
 
 // Helper function to crop image
 const getCroppedImg = async (imageSrc, pixelCrop) => {
@@ -145,7 +144,7 @@ export default function UserProfile() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`${PORT}/api/users/${userId}`, {
+        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
           withCredentials: true,
         })
 
@@ -205,7 +204,7 @@ export default function UserProfile() {
     formData.append("image", selectedFile)
 
     try {
-      const { data } = await axios.post(`${PORT}/api/users/${userId}/upload`, formData, {
+      const { data } = await axios.post(`${PORT}/api/users/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       })
@@ -226,7 +225,7 @@ export default function UserProfile() {
 
   const handleSaveProfile = async () => {
     try {
-      const response = await axios.put(`${PORT}/api/users/${userId}`, userData, {
+      const response = await axios.put(`${PORT}/api/users/update-user`, userData, {
         withCredentials: true,
       })
 

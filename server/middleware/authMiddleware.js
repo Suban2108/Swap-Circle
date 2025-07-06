@@ -1,6 +1,22 @@
 import jwt from "jsonwebtoken"
 import User from "../models/userModel.js"
 
+// ✅ Utility: Extract token from cookie or header
+const extractToken = (req) => {
+  // First, try from HttpOnly cookie
+  if (req.cookies && req.cookies.token) {
+    return req.cookies.token
+  }
+
+  // Fallback to Authorization header
+  const authHeader = req.headers["authorization"]
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.split(" ")[1]
+  }
+
+  return null
+}
+
 // Middleware: Bearer Token in header
 export const authenticateToken = async (req, res, next) => {
   try {
@@ -31,15 +47,16 @@ export const authenticateToken = async (req, res, next) => {
   }
 }
 
-// ✅ Middleware: Token from Cookie
+// ✅ Middleware: Protect routes (authenticated users only)
 export const protect = async (req, res, next) => {
   try {
-    const token = req.cookies.token
+    const token = extractToken(req)
 
     if (!token) {
-      return res.status(401).json({ message: "No token found in cookies" })
+      return res.status(401).json({ message: "Access token missing" })
     }
 
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     const user = await User.findById(decoded.userId).select("-password")
 
@@ -47,14 +64,24 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ message: "User not found" })
     }
 
+    // Attach user to request object
     req.user = user
     next()
   } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" })
+    let message = "Token verification failed"
+
+    if (error.name === "TokenExpiredError") {
+      message = "Token expired"
+    } else if (error.name === "JsonWebTokenError") {
+      message = "Invalid token"
+    }
+
+    return res.status(401).json({ message })
   }
 }
 
-// Middleware to check if user owns the item
+
+// ✅ Middleware: Check if logged-in user owns the item
 export const checkItemOwnership = async (req, res, next) => {
   try {
     const Item = (await import("../models/itemModel.js")).default
@@ -108,13 +135,14 @@ export const auth = async (req, res, next) => {
   }
 }
 
-// Admin Only
+// ✅ Middleware: Admin access only
 export const adminAuth = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
+  if (req.user && req.user.role === "admin") {
     return next()
   }
+
   return res.status(403).json({
     success: false,
-    message: 'Access denied. Admins only.',
+    message: "Access denied. Admins only.",
   })
 }

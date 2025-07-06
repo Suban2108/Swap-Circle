@@ -1,8 +1,6 @@
-// controllers/eventController.js
-import Event from '../models/eventModel.js';
-import User from '../models/userModel.js';
-import { validationResult } from 'express-validator';
-
+import Event from '../models/eventModel.js'
+import User from '../models/userModel.js'
+import { validationResult } from 'express-validator'
 
 // GET /api/events
 const getAllEvents = async (req, res) => {
@@ -20,7 +18,6 @@ const getAllEvents = async (req, res) => {
 
     const query = {}
 
-    // Search text
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -29,17 +26,14 @@ const getAllEvents = async (req, res) => {
       ]
     }
 
-    // Filter by category
     if (category && category !== 'all') {
       query.category = category
     }
 
-    // Filter by status
     if (status && status !== 'all') {
       query.status = status
     }
 
-    // Upcoming events filter
     if (upcoming === 'true') {
       query.startDate = { $gte: new Date() }
     }
@@ -71,369 +65,329 @@ const getAllEvents = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error('Failed to fetch events:', error.message)
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch events',
+      error: error.message,
     })
   }
 }
 
-
-// POST /api/events - Create new event
+// POST /api/events
 const createEvent = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array(),
+    })
+  }
 
+  try {
     const eventData = {
       ...req.body,
-      createdBy: req.user.id // Assuming auth middleware sets req.user
-    };
+      createdBy: req.user.id,
+    }
 
-    const event = new Event(eventData);
-    await event.save();
+    const event = new Event(eventData)
+    await event.save()
 
-    const populatedEvent = await Event.findById(event._id)
-      .populate('createdBy', 'name email');
+    const populatedEvent = await Event.findById(event._id).populate('createdBy', 'name email')
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'Event created successfully',
-      data: populatedEvent
-    });
+      data: populatedEvent,
+    })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to create event',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// GET /api/events/:id - Get event details
+// GET /api/events/:id
 const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id)
       .populate('createdBy', 'name email avatar')
-      .populate('participants.user', 'name email avatar');
+      .populate('participants.user', 'name email avatar')
 
     if (!event) {
       return res.status(404).json({
         success: false,
-        message: 'Event not found'
-      });
+        message: 'Event not found',
+      })
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: event
-    });
+      data: event,
+    })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to get event',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// PUT /api/events/:id - Update event
+// PUT /api/events/:id
 const updateEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
-    
+    const event = await Event.findById(req.params.id)
+
     if (!event) {
       return res.status(404).json({
         success: false,
-        message: 'Event not found'
-      });
+        message: 'Event not found',
+      })
     }
 
-    // Check if user is the creator or admin
     if (event.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to update this event'
-      });
+        message: 'Not authorized to update this event',
+      })
     }
 
-    const updatedEvent = await Event.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    ).populate('createdBy', 'name email');
+    const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    }).populate('createdBy', 'name email')
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Event updated successfully',
-      data: updatedEvent
-    });
+      data: updatedEvent,
+    })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to update event',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// DELETE /api/events/:id - Delete event
+// DELETE /api/events/:id
 const deleteEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
-    
+    const event = await Event.findById(req.params.id)
+
     if (!event) {
       return res.status(404).json({
         success: false,
-        message: 'Event not found'
-      });
+        message: 'Event not found',
+      })
     }
 
-    // Check if user is the creator or admin
     if (event.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to delete this event'
-      });
+        message: 'Not authorized to delete this event',
+      })
     }
 
-    await Event.findByIdAndDelete(req.params.id);
+    await Event.findByIdAndDelete(req.params.id)
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: 'Event deleted successfully'
-    });
+      message: 'Event deleted successfully',
+    })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to delete event',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// POST /api/events/:id/join - Join event
+// POST /api/events/:id/join
 const joinEvent = async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const userId = req.user.id;
 
-    const event = await Event.findById(eventId);
-    
+      const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array(),
+    })
+  }
+
+    const eventId = req.params.id
+    const userId = req.user.id
+
+    const event = await Event.findById(eventId)
+
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
+      return res.status(404).json({ success: false, message: 'Event not found' })
     }
 
-    // Check if event is active and not expired
     if (event.status !== 'active' || event.isExpired) {
-      return res.status(400).json({
-        success: false,
-        message: 'Event is not available for joining'
-      });
+      return res.status(400).json({ success: false, message: 'Event is not available for joining' })
     }
 
-    // Check if user already joined
-    const existingParticipant = event.participants.find(
-      p => p.user.toString() === userId && p.status === 'joined'
-    );
+    const alreadyJoined = event.participants.find(
+      (p) => p.user.toString() === userId && p.status === 'joined'
+    )
 
-    if (existingParticipant) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already joined this event'
-      });
+    if (alreadyJoined) {
+      return res.status(400).json({ success: false, message: 'User already joined this event' })
     }
 
-    // Check capacity
     if (event.maxParticipants && event.participantCount >= event.maxParticipants) {
-      return res.status(400).json({
-        success: false,
-        message: 'Event is full'
-      });
+      return res.status(400).json({ success: false, message: 'Event is full' })
     }
 
     event.participants.push({
       user: userId,
       joinedAt: new Date(),
-      status: 'joined'
-    });
+      status: 'joined',
+    })
 
-    await event.save();
+    await event.save()
 
-    const updatedEvent = await Event.findById(eventId)
-      .populate('participants.user', 'name email');
+    const updatedEvent = await Event.findById(eventId).populate('participants.user', 'name email')
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Successfully joined event',
-      data: updatedEvent
-    });
+      data: updatedEvent,
+    })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to join event',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// POST /api/events/:id/leave - Leave event
+// POST /api/events/:id/leave
 const leaveEvent = async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const userId = req.user.id;
+    const eventId = req.params.id
+    const userId = req.user.id
 
-    const event = await Event.findById(eventId);
-    
+    const event = await Event.findById(eventId)
+
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
+      return res.status(404).json({ success: false, message: 'Event not found' })
     }
 
-    const participantIndex = event.participants.findIndex(
-      p => p.user.toString() === userId && p.status === 'joined'
-    );
+    const index = event.participants.findIndex(
+      (p) => p.user.toString() === userId && p.status === 'joined'
+    )
 
-    if (participantIndex === -1) {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not a participant of this event'
-      });
+    if (index === -1) {
+      return res.status(400).json({ success: false, message: 'User is not a participant' })
     }
 
-    event.participants[participantIndex].status = 'cancelled';
-    await event.save();
+    event.participants[index].status = 'cancelled'
+    await event.save()
 
-    res.status(200).json({
-      success: true,
-      message: 'Successfully left event'
-    });
+    return res.status(200).json({ success: true, message: 'Successfully left event' })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to leave event',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// POST /api/events/:id/reward - Award karma to participants
+// POST /api/events/:id/reward
 const rewardParticipants = async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const { karmaPoints = 10, badgeReward } = req.body;
+    const eventId = req.params.id
+    const { karmaPoints = 10, badgeReward } = req.body
 
-    const event = await Event.findById(eventId);
-    
+    const event = await Event.findById(eventId)
+
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
+      return res.status(404).json({ success: false, message: 'Event not found' })
     }
 
-    // Check if user is the creator or admin
     if (event.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to reward participants'
-      });
+        message: 'Not authorized to reward participants',
+      })
     }
 
-    const participantIds = event.participants
-      .filter(p => p.status === 'joined')
-      .map(p => p.user);
+    const participants = event.participants.filter((p) => p.status === 'joined')
+    const participantIds = participants.map((p) => p.user)
 
-    const updatePromises = participantIds.map(async (userId) => {
-      const updateData = { $inc: { karmaPoints } };
-      
-      if (badgeReward) {
-        updateData.$addToSet = { badges: badgeReward };
-      }
+    const updates = participantIds.map((userId) => {
+      const update = { $inc: { karmaPoints } }
+      if (badgeReward) update.$addToSet = { badges: badgeReward }
+      return User.findByIdAndUpdate(userId, update, { new: true })
+    })
 
-      return User.findByIdAndUpdate(userId, updateData, { new: true });
-    });
+    await Promise.all(updates)
 
-    const updatedUsers = await Promise.all(updatePromises);
+    event.participants.forEach((p) => {
+      if (p.status === 'joined') p.status = 'completed'
+    })
+    event.status = 'completed'
+    await event.save()
 
-    // Mark participants as completed
-    event.participants.forEach(p => {
-      if (p.status === 'joined') {
-        p.status = 'completed';
-      }
-    });
-
-    event.status = 'completed';
-    await event.save();
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: `Rewards awarded to ${updatedUsers.length} participants`,
+      message: `Rewards given to ${participantIds.length} participants`,
       data: {
-        rewardedUsers: updatedUsers.length,
+        rewardedUsers: participantIds.length,
         karmaPoints,
-        badgeReward
-      }
-    });
+        badgeReward,
+      },
+    })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to reward participants',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
-// GET /api/events/user/:userId - Get user's events
+// GET /api/events/user/:userId
 const getUserEvents = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const { type = 'all' } = req.query;
+    const userId = req.params.userId
+    const { type = 'all' } = req.query
 
-    let query = {};
-    
+    let query = {}
     if (type === 'created') {
-      query.createdBy = userId;
+      query.createdBy = userId
     } else if (type === 'joined') {
-      query['participants.user'] = userId;
+      query['participants.user'] = userId
     } else {
       query = {
-        $or: [
-          { createdBy: userId },
-          { 'participants.user': userId }
-        ]
-      };
+        $or: [{ createdBy: userId }, { 'participants.user': userId }],
+      }
     }
 
     const events = await Event.find(query)
       .populate('createdBy', 'name email')
       .populate('participants.user', 'name email')
-      .sort({ startDate: -1 });
+      .sort({ startDate: -1 })
 
-    res.status(200).json({
-      success: true,
-      data: events
-    });
+    return res.status(200).json({ success: true, data: events })
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to fetch user events',
-      error: error.message
-    });
+      error: error.message,
+    })
   }
-};
+}
 
 export {
   getAllEvents,
@@ -444,5 +398,5 @@ export {
   joinEvent,
   leaveEvent,
   rewardParticipants,
-  getUserEvents
-};
+  getUserEvents,
+}

@@ -10,7 +10,7 @@ import axios from "axios"
 import { useAuth } from "../../../context/authContext"
 import toast from "react-hot-toast"
 
-const ChatContainer = ({ userId, apiUrl, token }) => {
+const ChatContainer = ({ userId, apiUrl, Userdata }) => {
   const [mode, setMode] = useState("groups")
   const [selectedConversation, setSelectedConversation] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -56,7 +56,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
   }
 
   const handleSelectConversation = async (conversation) => {
-    console.log("Selected conversation:", conversation)
     setSelectedConversation(conversation)
     await fetchConversationMessages(conversation._id)
     if (conversation.unreadCount && conversation.unreadCount > 0) {
@@ -132,7 +131,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     let avatar = ""
     let groupId = null
 
-    console.log("Transforming conversation:", conversation)
 
     if (conversation.type === "direct") {
       const otherParticipant = conversation.participants?.find((p) => p._id !== userId)
@@ -158,7 +156,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
       createdBy: conversation.groupId?.createdBy,
     }
 
-    console.log("Transformed conversation:", transformedConversation)
     return transformedConversation
   }
 
@@ -169,15 +166,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
     }
 
     try {
-      console.log("Uploading file:", {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        conversationId: selectedConversation._id,
-        senderId: userId,
-        content: caption,
-      })
-
       const formData = new FormData()
       formData.append("file", file)
       formData.append("senderId", userId)
@@ -187,19 +175,12 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
         formData.append("content", caption.trim())
       }
 
-      for (const [key, value] of formData.entries()) {
-        console.log(`FormData ${key}:`, value)
-      }
-
       const response = await axios.post(`${PORT}/api/messages/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          ...(token && { Authorization: `Bearer ${token}` }),
         },
         timeout: 30000,
       })
-
-      console.log("File upload response:", response.data)
 
       if (response.status === 201) {
         await fetchConversationMessages(selectedConversation._id)
@@ -222,11 +203,9 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
 
   const handleUpdateGroupInfo = async (groupId, updateData) => {
     try {
-      console.log("ChatContainer: Updating group info:", groupId, updateData)
 
       const result = await chatAPI.updateCircle(groupId, { ...updateData, userId })
 
-      console.log("ChatContainer: Update result:", result)
 
       if (refreshConversations) {
         await refreshConversations()
@@ -241,7 +220,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
 
   const handleRefreshChat = async (conversationId) => {
     try {
-      console.log("ChatContainer: Refreshing chat:", conversationId)
 
       if (refreshConversations) {
         await refreshConversations()
@@ -255,7 +233,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
         updatedDirectConversations.find((c) => c._id === conversationId)
 
       if (updatedConversation && selectedConversation?._id === conversationId) {
-        console.log("ChatContainer: Updating selected conversation")
         setSelectedConversation(updatedConversation)
       }
     } catch (error) {
@@ -264,7 +241,6 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
   }
 
   const handleDeleteMessage = (messageId) => {
-    console.log("ChatContainer: Deleting message from UI:", messageId)
 
     if (selectedConversation) {
       fetchConversationMessages(selectedConversation._id)
@@ -285,7 +261,7 @@ const ChatContainer = ({ userId, apiUrl, token }) => {
         onCloseMobileMenu={handleCloseMobileMenu}
         userId={userId}
         apiUrl={apiUrl}
-        token={token}
+        Userdata={Userdata}
       />
 
       <ChatList

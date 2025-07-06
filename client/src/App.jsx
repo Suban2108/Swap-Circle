@@ -14,7 +14,7 @@ const App = () => {
         position="top-center"
         toastOptions={{
           style: {
-            minWidth: '250px', // or maxWidth, width
+            minWidth: '300px', // or maxWidth, width
             padding: '5px',
             fontSize: '14px',
             marginBottom:"5px"

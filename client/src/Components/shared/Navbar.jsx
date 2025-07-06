@@ -53,7 +53,7 @@ const AwesomeNavbar = () => {
   const fetchUser = async (userId) => {
     try {
       console.log("Fetching user info for ID:", userId)
-      const { data } = await axios.get(`${PORT}/api/users/${userId}`, { withCredentials: true })
+      const { data } = await axios.get(`${PORT}/api/users/get-user`, { withCredentials: true })
 
       setUserData({
         ...data,
@@ -171,7 +171,7 @@ const AwesomeNavbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <img
-                    src={userData?.avatar || default_user_image}
+                    src={`${PORT}${userData?.avatar}` || default_user_image}
                     alt="Profile"
                     className="w-10 h-10 rounded-full border-2 border-orange-300 cursor-pointer transition hover:scale-105"
                     onError={(e) => {

@@ -1,44 +1,76 @@
-import React, { useState } from 'react';
+"use client"
+
+import React, { useState } from "react"
 import {
   Mail, Phone, MapPin, MessageSquare, Users,
   Recycle, Heart, Calendar, BarChart3, Send,
   CheckCircle
-} from 'lucide-react';
-import HeroSection from './HeroSection';
+} from "lucide-react"
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
+import "leaflet/dist/leaflet.css"
+import L from "leaflet"
+import HeroSection from "./HeroSection"
+
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+})
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-    inquiryType: 'general',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+    inquiryType: "general",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState(null)
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus(null)
 
-    setTimeout(() => {
-      setSubmitStatus('success');
-      setIsSubmitting(false);
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: '',
-        inquiryType: 'general'
-      });
-      setTimeout(() => setSubmitStatus(null), 5000);
-    }, 1500);
-  };
+    try {
+      const res = await fetch("http://localhost:5005/api/users/send-contact-query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setSubmitStatus("success")
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+          inquiryType: "general",
+        })
+      } else {
+        setSubmitStatus("error")
+      }
+    } catch (error) {
+      console.error("Error sending message:", error)
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+      setTimeout(() => setSubmitStatus(null), 5000)
+    }
+  }
 
   const contactInfo = [
     {
@@ -64,8 +96,8 @@ export default function ContactPage() {
       title: "Live Chat",
       content: "Available 24/7",
       description: "Instant community support",
-    }
-  ];
+    },
+  ]
 
   const features = [
     {
@@ -87,19 +119,19 @@ export default function ContactPage() {
       icon: <Calendar className="w-8 h-8" />,
       title: "Event Mode",
       description: "Organize themed donation events like 'Winter Donation Week'",
-    }
-  ];
+    },
+  ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-sky-100 mt-[80px]">
-    <HeroSection/>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-sky-100 mt-[40px]">
+      <HeroSection />
       <main className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold text-blue-900 mb-6">Get In Touch</h1>
             <p className="text-xl text-blue-800 max-w-3xl mx-auto leading-relaxed">
-              Join our community of sustainability champions. Whether you're starting a new SwapCircle 
+              Join our community of sustainability champions. Whether you're starting a new SwapCircle
               or need support for your existing community, we're here to help.
             </p>
           </div>
@@ -115,10 +147,7 @@ export default function ContactPage() {
 
               <div className="space-y-6">
                 {contactInfo.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-4 p-4 rounded-xl bg-blue-50 hover:bg-orange-100 transition-colors duration-200"
-                  >
+                  <div key={index} className="flex items-start space-x-4 p-4 rounded-xl bg-blue-50 hover:bg-orange-100 transition-colors duration-200">
                     <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white">
                       {item.icon}
                     </div>
@@ -139,17 +168,23 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Form */}
+            {/* Contact Form */}
             <div className="bg-white rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2">
               <h2 className="text-3xl font-bold text-blue-900 mb-8 flex items-center">
                 <Send className="w-8 h-8 text-blue-600 mr-3" />
                 Send us a Message
               </h2>
 
-              {submitStatus === 'success' && (
+              {submitStatus === "success" && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <p className="text-green-800">Message sent successfully! We'll get back to you soon.</p>
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 font-medium">
+                  Oops! Something went wrong. Please try again later.
                 </div>
               )}
 
@@ -162,6 +197,7 @@ export default function ContactPage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white"
                     />
                   </div>
@@ -172,6 +208,7 @@ export default function ContactPage() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white"
                     />
                   </div>
@@ -200,6 +237,7 @@ export default function ContactPage() {
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white"
                   />
                 </div>
@@ -211,6 +249,7 @@ export default function ContactPage() {
                     value={formData.message}
                     onChange={handleInputChange}
                     rows={5}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white resize-none"
                     placeholder="Tell us about your community or how we can help..."
                   />
@@ -237,25 +276,35 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Map Section */}
+          {/* Interactive Map Section */}
           <div className="bg-white rounded-3xl p-8 shadow-2xl mb-16">
             <h2 className="text-3xl font-bold text-blue-900 mb-8 flex items-center">
               <MapPin className="w-8 h-8 text-blue-600 mr-3" />
               Community Locations
             </h2>
+            <div className="overflow-hidden rounded-2xl h-[600px]">
+              <MapContainer center={[22.9734, 78.6569]} zoom={5} className="h-full w-full z-10">
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
 
-            <div className="bg-gradient-to-br from-blue-100 to-orange-100 rounded-2xl h-96 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-orange-400/20" />
-              <div className="text-center z-10">
-                <MapPin className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Interactive Community Map</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Discover SwapCircle communities near you or find the perfect location for your new community.
-                </p>
-                <button className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
-                  Explore Communities
-                </button>
-              </div>
+                <Marker position={[12.9716, 77.5946]}>
+                  <Popup>Bengaluru - SwapCircle Community</Popup>
+                </Marker>
+                <Marker position={[28.6139, 77.2090]}>
+                  <Popup>Delhi - SwapCircle Community</Popup>
+                </Marker>
+                <Marker position={[19.0760, 72.8777]}>
+                  <Popup>Mumbai - SwapCircle Community</Popup>
+                </Marker>
+                <Marker position={[13.0827, 80.2707]}>
+                  <Popup>Chennai - SwapCircle Community</Popup>
+                </Marker>
+                <Marker position={[17.3850, 78.4867]}>
+                  <Popup>Hyderabad - SwapCircle Community</Popup>
+                </Marker>
+              </MapContainer>
             </div>
           </div>
 
@@ -277,5 +326,5 @@ export default function ContactPage() {
         </div>
       </main>
     </div>
-  );
+  )
 }

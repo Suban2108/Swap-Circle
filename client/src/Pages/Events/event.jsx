@@ -9,6 +9,8 @@ import { CreateEventModal } from "./Component/CreateEvent"
 import { Plus, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/api/EventAPi"
 import toast from 'react-hot-toast'
+import { useAuth } from "@/context/authContext"
+import axios from "axios"
 
 
 export default function EventsPage() {
@@ -26,7 +28,7 @@ export default function EventsPage() {
   const [filters, setFilters] = useState({
     search: "",
     category: "all",
-    status: "active",
+    status: "all",
     sortBy: "startDate",
     sortOrder: "asc",
     upcoming: false,
@@ -34,6 +36,41 @@ export default function EventsPage() {
     limit: 12,
   })
   const [joinedEvents, setJoinedEvents] = useState(new Set())
+  const [userData, setUserData] = useState(null)
+  const { userId, user, PORT } = useAuth()
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
+          withCredentials: true,
+        })
+
+
+        setUserData({
+          ...data,
+          avatar: data.avatar || default_user_image,
+          coverImage: data.coverImage,
+          socialLinks: data.socialLinks || {
+            instagram: "",
+            twitter: "",
+            facebook: "",
+          },
+
+        })
+
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUser()
+  }, [PORT, userId])
+
+
+
 
   const fetchEvents = async () => {
     setLoading(true)
@@ -64,7 +101,7 @@ export default function EventsPage() {
     setFilters({
       search: "",
       category: "all",
-      status: "active",
+      status: "all",
       sortBy: "startDate",
       sortOrder: "asc",
       upcoming: false,
@@ -117,12 +154,43 @@ export default function EventsPage() {
     toast.success("Event created successfully!")
   }
 
+  const handleStatusChange = async (eventId, newStatus) => {
+    try {
+      const res = await apiClient.updateEvent(eventId, { status: newStatus });
+
+      console.log("Updating event:", eventId, "with status:", newStatus)
+
+      if (res.success) {
+        toast.success("Status updated");
+        fetchEvents(); // Refresh list
+      } else {
+        toast.error(res.message || "Failed to update");
+      }
+    } catch (e) {
+      toast.error("Error updating status");
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      const res = await apiClient.deleteEvent(eventId)
+      if (res.success) {
+        toast.success("Event deleted successfully!")
+        fetchEvents()
+      } else {
+        toast.error(res.message || "Failed to delete event")
+      }
+    } catch (err) {
+      toast.error("Error deleting event")
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 mt-15">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 py-8">
         {/* Hero */}
-        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-8 mb-8 text-white">
-          <div className="flex justify-between items-center">
+        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-2xl p-8 mb-8  text-white">
+          <div className="flex justify-between items-center h-30">
             <div>
               <h1 className="text-4xl font-bold mb-2">Discover Events</h1>
               <p className="text-orange-100 text-lg">
@@ -184,11 +252,16 @@ export default function EventsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {events.map((event) => (
                 <EventCard
-                  key={event._id}
+                  key={event._id} // ✅ This fixes the warning
                   event={event}
                   onJoin={handleJoinEvent}
                   onLeave={handleLeaveEvent}
                   isJoined={joinedEvents.has(event._id)}
+                  onStatusChange={handleStatusChange}
+                  currentUserId={userId}
+                  currentUserRole={userData?.role}
+                  currentUserAvatar={userData?.avatar}
+                  onDelete={handleDeleteEvent}
                 />
               ))}
             </div>
