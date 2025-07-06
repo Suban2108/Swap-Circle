@@ -27,7 +27,7 @@ import Cookies from 'js-cookie'
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [userData, setUserData] = useState(null)
 
   const { PORT } = useAuth()
