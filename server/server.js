@@ -24,7 +24,7 @@ import 'dotenv/config'
 //app config
 const app = express();
 
-const PORT = process.env.PORT || 5005;
+const PORT = 5005;
 
 const allowedOrigins = ['https://swap-circle-frontend.onrender.com'];
 
