@@ -1,4 +1,4 @@
-import express from 'express'
+import express from "express"
 import {
   getAllItems,
   getItemById,
@@ -6,31 +6,37 @@ import {
   updateItem,
   deleteItem,
   searchItems,
-  getItemsByUser
-} from '../controllers/itemControllers.js'
+  getItemsByUser,
+  toggleLike,
+  createSwapRequest,
+  getItemLikes,
+  getItemSwapRequests,
+  updateSwapRequestStatus,
+  getMarketplaceStats,
+} from "../controllers/itemControllers.js"
+
+import { uploadItemImages, handleUploadError } from "../middleware/uploadItemMiddleware.js"
+import { protect, checkItemOwnership } from "../middleware/authMiddleware.js" // ✅ protect = cookie-based auth
 
 const itemRouter = express.Router()
 
-// http://localhost:5005/api/items/search
-itemRouter.get('/search', searchItems)
+// 🌐 Public Routes – STATIC First
+itemRouter.get("/search", searchItems)
+itemRouter.get("/user/:userId", getItemsByUser)
+itemRouter.get("/stats", getMarketplaceStats)
+itemRouter.get("/", getAllItems) // Keep "/" before dynamic ":id" to avoid conflicts
 
-// http://localhost:5005/api/items/user/:userId
-itemRouter.get('/user/:userId', getItemsByUser)
+// 🔐 Protected Routes – STATIC First
+itemRouter.post("/create-items", protect, uploadItemImages, handleUploadError, createItem)
+itemRouter.get("/:id/likes", protect, getItemLikes)
+itemRouter.post("/:id/like", protect, toggleLike)
+itemRouter.post("/:id/swap-request", protect, createSwapRequest)
+itemRouter.get("/:id/swap-requests", protect, getItemSwapRequests)
+itemRouter.put("/:id/swap-requests/:requestId", protect, updateSwapRequestStatus)
 
-
-// http://localhost:5005/api/items
-itemRouter.get('/', getAllItems)
-
-// http://localhost:5005/api/items/:id
-itemRouter.get('/:id', getItemById)
-
-// http://localhost:5005/api/items/create-items
-itemRouter.post('/create-items', createItem)
-
-// http://localhost:5005/api/items/:id
-itemRouter.put('/:id', updateItem)
-
-// http://localhost:5005/api/items/:id
-itemRouter.delete('/:id', deleteItem)
+// 🔐 Protected Routes – DYNAMIC Routes After Static
+itemRouter.get("/:id", getItemById)
+itemRouter.put("/:id", protect, checkItemOwnership, uploadItemImages, handleUploadError, updateItem)
+itemRouter.delete("/:id", protect, checkItemOwnership, deleteItem)
 
 export default itemRouter

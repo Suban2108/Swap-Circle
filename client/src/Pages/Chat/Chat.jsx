@@ -1,100 +1,134 @@
-import React,{ useState } from "react"
-import ChatSidebarToggle from "./Component/ChatSidebar"
-import ChatListSidebar from "./Component/ChatsList"
-import ChatMainWindow from "./Component/ChatMainWindow"
+"use client"
 
-// Mock data
-const groups = [
-  { id: "g1", name: "Dev Team", lastMessage: "Push your code", time: "2:30 PM", unread: 3, avatar: "DT", online: true },
-  { id: "g2", name: "Designers", lastMessage: "Logo finalized!", time: "1:45 PM", unread: 0, avatar: "DS", online: false },
-  { id: "g3", name: "Marketing Team", lastMessage: "Campaign launch tomorrow", time: "12:20 PM", unread: 1, avatar: "MT", online: true },
-  { id: "g4", name: "QA Squad", lastMessage: "Bug reported in login flow", time: "3:50 PM", unread: 2, avatar: "QA", online: true },
-  { id: "g5", name: "HR Group", lastMessage: "Townhall rescheduled", time: "10:10 AM", unread: 0, avatar: "HR", online: false },
-  { id: "g6", name: "All Hands", lastMessage: "Slides updated", time: "9:30 AM", unread: 4, avatar: "AH", online: true },
-  { id: "g7", name: "Frontend Crew", lastMessage: "Need review on PR #234", time: "11:45 AM", unread: 1, avatar: "FE", online: false },
-  { id: "g8", name: "Backend Ops", lastMessage: "Database migration tonight", time: "4:15 PM", unread: 5, avatar: "BO", online: true },
-  { id: "g9", name: "Product Managers", lastMessage: "Feedback needed on v2", time: "2:05 PM", unread: 0, avatar: "PM", online: true },
-  { id: "g10", name: "Support Team", lastMessage: "Ticket backlog updated", time: "1:00 PM", unread: 3, avatar: "ST", online: false },
-  { id: "g11", name: "UX Research", lastMessage: "User interviews start Monday", time: "5:30 PM", unread: 0, avatar: "UX", online: false },
-  { id: "g12", name: "Security Cell", lastMessage: "New policy doc shared", time: "6:20 PM", unread: 2, avatar: "SC", online: true },
-]
+import React, { useEffect, useState } from "react"
+import ChatContainer from "./Component/ChatContainer"
+import { useAuth } from "../../context/authContext"
+import { Skeleton } from "../../Components/ui/skeleton"
+import axios from 'axios'
 
-const individuals = [
-  { id: "u1", name: "Alice Chen", lastMessage: "Let's talk later", time: "3:15 PM", unread: 2, avatar: "AC", online: true },
-  { id: "u2", name: "Bob Wilson", lastMessage: "Check this out!", time: "2:50 PM", unread: 0, avatar: "BW", online: false },
-  { id: "u3", name: "Carol Smith", lastMessage: "Thanks for the help", time: "11:30 AM", unread: 0, avatar: "CS", online: true },
-  { id: "u4", name: "Daniel Lee", lastMessage: "Meeting starts in 5 mins", time: "9:45 AM", unread: 1, avatar: "DL", online: true },
-  { id: "u5", name: "Ella Patel", lastMessage: "Can you review my PR?", time: "10:10 AM", unread: 3, avatar: "EP", online: false },
-  { id: "u6", name: "Frank Gomez", lastMessage: "Lunch was great!", time: "1:20 PM", unread: 0, avatar: "FG", online: true },
-  { id: "u7", name: "Grace Kim", lastMessage: "Sent the documents", time: "4:05 PM", unread: 0, avatar: "GK", online: false },
-  { id: "u8", name: "Henry Zhao", lastMessage: "I'll join the call shortly", time: "12:00 PM", unread: 1, avatar: "HZ", online: true },
-  { id: "u9", name: "Isla Moore", lastMessage: "Sounds good!", time: "8:15 AM", unread: 0, avatar: "IM", online: false },
-  { id: "u10", name: "Jack Nguyen", lastMessage: "Working on it now", time: "3:55 PM", unread: 2, avatar: "JN", online: true },
-  { id: "u11", name: "Kira Davis", lastMessage: "See you tomorrow", time: "5:10 PM", unread: 0, avatar: "KD", online: false },
-  { id: "u12", name: "Liam Johnson", lastMessage: "Almost done with the task", time: "6:00 PM", unread: 1, avatar: "LJ", online: true },
-]
+export default function ChatPage() {
+  const [loading, setLoading] = useState(true)
+  const [userData, setUserData] = useState(null) // <-- NEW
+  const { PORT, userId } = useAuth()
 
-const Chat = () => {
-  const [mode, setMode] = useState("groups")
-  const [selectedChat, setSelectedChat] = useState(null)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isMobileListOpen, setIsMobileListOpen] = useState(false)
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (userId) {
+          console.log("[ChatPage] userId from context:", userId)
+          setLoading(false)
+          return
+        }
 
-  const handleShowMobileMenu = () => {
-    setIsMobileMenuOpen(true)
-    setIsMobileListOpen(false)
-  }
+        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
+          withCredentials: true,
+        })
 
-  const handleShowMobileList = () => {
-    setIsMobileListOpen(true)
-    setIsMobileMenuOpen(false)
-  }
+        console.log("[ChatPage] Data fetched from cookie-based auth:", data.avatar)
 
-  const handleBackToToggle = () => {
-    setIsMobileListOpen(false)
-    setIsMobileMenuOpen(true)
-  }
+        if (data && data._id) {
+          setUserData(data)
+          setLoading(false)
+        } else {
+          throw new Error("User not found in response")
+        }
+      } catch (error) {
+        console.error("Auth failed. Redirecting to login...", error)
+        window.location.href = "/login"
+      }
+    }
 
-  const handleCloseMobileMenu = () => {
-    setIsMobileMenuOpen(false)
-  }
+    fetchUser()
+  }, [PORT, userId])
 
-  const handleCloseMobileList = () => {
-    setIsMobileListOpen(false)
+  if (loading || (!userId && !userData)) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950">
+        <div className="w-full max-w-4xl mx-auto p-4">
+          <div className="flex h-[600px] bg-white dark:bg-slate-900 rounded-lg shadow-lg overflow-hidden">
+            {/* Sidebar Skeleton */}
+            <div className="w-16 bg-gradient-to-b from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-900 border-r border-blue-200 dark:border-blue-800 p-4 space-y-4">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <Skeleton className="w-8 h-8 rounded-full" />
+            </div>
+
+            {/* Chat List Skeleton */}
+            <div className="w-80 bg-gradient-to-b from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-900 border-r border-blue-200 dark:border-blue-800">
+              <div className="p-4 border-b border-blue-200 dark:border-blue-800">
+                <Skeleton className="h-6 w-24 mb-3" />
+                <Skeleton className="h-10 w-full rounded-lg" />
+              </div>
+              <div className="p-2 space-y-2">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-white/50 dark:bg-slate-800/50">
+                    <div className="flex items-center space-x-3">
+                      <Skeleton className="w-12 h-12 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <div className="flex justify-between">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-3 w-12" />
+                        </div>
+                        <Skeleton className="h-3 w-32" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Chat Window Skeleton */}
+            <div className="flex-1 flex flex-col">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-950">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Skeleton className="w-10 h-10 rounded-full" />
+                    <div className="space-y-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 p-4 space-y-4 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                    <div className="max-w-xs">
+                      <Skeleton
+                        className={`h-12 rounded-2xl ${i % 2 === 0 ? "rounded-bl-md" : "rounded-br-md"}`}
+                        style={{ width: `${120 + Math.random() * 100}px` }}
+                      />
+                      <Skeleton className="h-3 w-16 mt-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="w-10 h-10 rounded-full" />
+                  <Skeleton className="flex-1 h-12 rounded-2xl" />
+                  <Skeleton className="w-12 h-12 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="h-screen md:h-[700px] md:mt-16 mt-16 flex bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950 overflow-hidden">
-
-      {/* Mobile Sidebar Toggle */}
-      <ChatSidebarToggle
-        selected={mode}
-        onSelect={setMode}
-        isMobileMenuOpen={isMobileMenuOpen}
-        onCloseMobileMenu={handleCloseMobileMenu}
-      />
-
-      {/* Mobile Chat List */}
-      <ChatListSidebar
-        list={mode === "groups" ? groups : individuals}
-        selectedId={selectedChat?.id}
-        onSelect={setSelectedChat}
-        mode={mode}
-        isMobileListOpen={isMobileListOpen}
-        onCloseMobileList={handleCloseMobileList}
-        onBackToToggle={handleBackToToggle}
-      />
-
-      {/* Main Chat Area */}
-      <div className="flex-1 min-w-0">
-        <ChatMainWindow
-          selectedChat={selectedChat}
-          onShowMobileMenu={handleShowMobileMenu}
-          onShowMobileList={handleShowMobileList}
-        />
-      </div>
-    </div>
+    <ChatContainer
+      userId={userId || userData?._id}
+      apiURL={PORT}
+      user={userData}
+    />
   )
 }
-
-export default Chat

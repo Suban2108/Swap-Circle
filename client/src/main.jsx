@@ -6,9 +6,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/authContext';
 
 createRoot(document.getElementById('root')).render(
-  <GoogleOAuthProvider clientId='891912978499-gpfmsgjhunmgm2ihohmqknfskmk8slcq.apps.googleusercontent.com'>
-    <AuthProvider>
+    <GoogleOAuthProvider clientId='891912978499-gpfmsgjhunmgm2ihohmqknfskmk8slcq.apps.googleusercontent.com'>
+      <AuthProvider>
         <App />
-    </AuthProvider>
-  </GoogleOAuthProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
 )

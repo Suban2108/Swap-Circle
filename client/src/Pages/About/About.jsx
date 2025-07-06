@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  Users, 
-  Recycle, 
-  Heart, 
-  MessageCircle, 
-  Search, 
-  Shield, 
-  Star, 
-  Truck, 
-  Calendar, 
+import {
+  Users,
+  Recycle,
+  Heart,
+  MessageCircle,
+  Search,
+  Shield,
+  Star,
+  Truck,
+  Calendar,
   BarChart3,
   Leaf,
   Home,
@@ -17,12 +17,13 @@ import {
   UserPlus
 } from 'lucide-react';
 import Banner_Image from '../../assets/About-banner.avif'
+import toast from 'react-hot-toast';
 
 // Hero Section Component
 const HeroSection = () => (
-  <div className="bg-gradient-to-r mt-[20px] from-blue-50 to-orange-500 py-20 px-6">
+  <div className=" mt-[20px] bg-gradient-to-br from-orange-50 via-amber-500 to-yellow-50 py-20 px-6">
     <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-      
+
       {/* Text Section */}
       <div className="text-center md:text-left">
         <div className="flex justify-center md:justify-start mb-6">
@@ -34,7 +35,7 @@ const HeroSection = () => (
           Welcome to <span className="text-orange-600">Swap-Circle</span>
         </h1>
         <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-          A local barter and donation platform that brings communities together through sustainable sharing. 
+          A local barter and donation platform that brings communities together through sustainable sharing.
           Turn your unused items into someone else's treasure while building meaningful connections.
         </p>
         <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
@@ -65,8 +66,8 @@ const MissionStatement = () => (
       <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Mission</h2>
       <div className="bg-gradient-to-r from-orange-100 to-blue-100 p-8 rounded-2xl">
         <p className="text-lg text-gray-700 leading-relaxed mb-6">
-          SwapCircle exists to foster sustainable communities where sharing is caring. We believe that 
-          every unused item has the potential to bring joy to someone else, while reducing waste and 
+          SwapCircle exists to foster sustainable communities where sharing is caring. We believe that
+          every unused item has the potential to bring joy to someone else, while reducing waste and
           strengthening bonds between neighbors.
         </p>
         <div className="grid md:grid-cols-3 gap-6 mt-8">
@@ -287,7 +288,7 @@ const SocialImpact = () => (
 
 // Call to Action Component
 const CallToAction = () => (
-  <div className="py-20 px-6 bg-gradient-to-r from-orange-50 to-blue-50">
+  <div className="py-20 px-6 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
     <div className="max-w-4xl mx-auto text-center">
       <h2 className="text-4xl font-bold text-gray-900 mb-6">
         Ready to Join the Circle?
@@ -296,9 +297,12 @@ const CallToAction = () => (
         Start sharing, start caring, and become part of a community that values sustainability and mutual support.
       </p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl">
+        <button
+          onClick={() => toast.success("🎉 Your invite request has been sent to the admin. We'll get back to you shortly!")}
+          className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl">
           Request an Invite
         </button>
+
         <button className="border-2 border-orange-600 text-orange-600 hover:bg-blue-200 hover:text-blue-700 hover:border-blue-600 px-8 py-4 rounded-xl font-semibold transition-colors">
           Learn More
         </button>
@@ -310,7 +314,7 @@ const CallToAction = () => (
 // Main About Component
 const About = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
       <HeroSection />
       <MissionStatement />
       <TargetAudiences />

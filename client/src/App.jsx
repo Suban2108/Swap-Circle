@@ -14,10 +14,9 @@ const App = () => {
         position="top-center"
         toastOptions={{
           style: {
-            minWidth: '250px', // or maxWidth, width
+            minWidth: '300px', // or maxWidth, width
             padding: '5px',
             fontSize: '14px',
-            border:'2px solid #4ade80',
             marginBottom:"5px"
           },
         }}

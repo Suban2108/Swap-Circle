@@ -4,12 +4,12 @@ import mongoose from 'mongoose';
 const chatSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: true
   },
   receiverId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user'
+    ref: 'User'
   },
   groupId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,6 +22,12 @@ const chatSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true
+  },
+  file: {
+    name: String,
+    url: String,
+    type: String,
+    size: Number,
   },
   timestamp: {
     type: Date,

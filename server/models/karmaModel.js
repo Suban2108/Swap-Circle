@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 const karmaSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: 'User',
     required: true
   },
   reason: {

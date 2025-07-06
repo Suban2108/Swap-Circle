@@ -180,15 +180,6 @@ const AwesomeFooter = () => {
           </div>
         </div>
       </div>
-
-      {/* Scroll to Top */}
-      <Button
-        variant="ghost"
-        onClick={scrollToTop}
-        className="fixed bottom-8 left-[50%] w-10 h-10 rounded-full bg-gradient-to-r from-[#077FBA] to-orange-500 text-white shadow-2xl hover:scale-110 transition z-50"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </Button>
     </footer>
   )
 }

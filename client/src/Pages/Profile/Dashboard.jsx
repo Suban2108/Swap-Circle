@@ -32,37 +32,37 @@ export default function SwapCircleDashboard() {
     const [loading, setLoading] = useState(true);
 
 
-    const USER_ID = localStorage.getItem("userId")
-    const { token, PORT } = useAuth()
+    const { PORT, userId } = useAuth()
     const location = useLocation();
+    const USER_ID = userId
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const { data } = await axios.get(`${PORT}/api/users/${USER_ID}`);
-                setUserData({
-                    ...data,
-                    avatar: data.avatar || default_user_image,
-                    coverImage: data.coverImage,
-                    socialLinks: data.socialLinks || {
-                        instagram: "",
-                        twitter: "",
-                        facebook: "",
-                    },
-                });
-            } catch (error) {
-                console.error("Error fetching user:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
 
-        if (token && USER_ID) {
-            fetchUser();
-        } else {
-            setLoading(false); // prevent indefinite loading state
-        }
-    }, [token, PORT, USER_ID]);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
+          withCredentials: true,
+        })
+
+        setUserData({
+          ...data,
+          avatar: data.avatar || default_user_image,
+          coverImage: data.coverImage || default_banner_image,
+          socialLinks: data.socialLinks || {
+            instagram: "",
+            twitter: "",
+            facebook: "",
+          },
+        })
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUser()
+  }, [PORT, userId])
 
 
     const navigationItems = [

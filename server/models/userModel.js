@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
 
   avatar: {
     type: String,
-    default:"/default/Default_user_image.jpeg"
+    default: "/default/Default_user_image.jpeg"
   },
 
   coverImage: {
@@ -79,6 +79,12 @@ const userSchema = new mongoose.Schema({
 
   resetPasswordExpires: {
     type: Date,
+  },
+
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
   },
 }, { timestamps: true });
 
