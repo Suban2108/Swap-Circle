@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import ChatContainer from "./Component/chatContainer"
+import ChatContainer from "./Component/ChatContainer"
 import { useAuth } from "../../context/authContext"
 import { Skeleton } from "../../Components/ui/skeleton"
 import axios from 'axios'
