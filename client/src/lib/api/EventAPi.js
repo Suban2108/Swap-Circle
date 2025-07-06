@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_BASE_URL = "http://localhost:5005/api"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class ApiClient {
   constructor() {
@@ -15,7 +15,7 @@ class ApiClient {
 
   async getAllEvents(filters = {}) {
     try {
-      const response = await this.client.get("/events", { params: filters })
+      const response = await this.client.get("/api/events", { params: filters })
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -24,7 +24,7 @@ class ApiClient {
 
   async getEvent(id) {
     try {
-      const response = await this.client.get(`/events/${id}`)
+      const response = await this.client.get(`/api/events/${id}`)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -33,7 +33,7 @@ class ApiClient {
 
   async createEvent(eventData) {
     try {
-      const response = await this.client.post("/events", eventData)
+      const response = await this.client.post("/api/events", eventData)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -42,7 +42,7 @@ class ApiClient {
 
   async updateEvent(id, eventData) {
     try {
-      const response = await this.client.put(`/events/${id}`, eventData)
+      const response = await this.client.put(`/api/events/${id}`, eventData)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -51,7 +51,7 @@ class ApiClient {
 
   async deleteEvent(id) {
     try {
-      const response = await this.client.delete(`/events/${id}`)
+      const response = await this.client.delete(`/api/events/${id}`)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -60,7 +60,7 @@ class ApiClient {
 
   async joinEvent(id) {
     try {
-      const response = await this.client.post(`/events/${id}/join`)
+      const response = await this.client.post(`/api/events/${id}/join`)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -69,7 +69,7 @@ class ApiClient {
 
   async leaveEvent(id) {
     try {
-      const response = await this.client.post(`/events/${id}/leave`)
+      const response = await this.client.post(`/api/events/${id}/leave`)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -78,7 +78,7 @@ class ApiClient {
 
   async rewardParticipants(id, data) {
     try {
-      const response = await this.client.post(`/events/${id}/reward`, data)
+      const response = await this.client.post(`/api/events/${id}/reward`, data)
       return response.data
     } catch (error) {
       return this.handleError(error)
@@ -87,7 +87,7 @@ class ApiClient {
 
   async getUserEvents(type = "all") {
     try {
-      const response = await this.client.get(`/events/user/me`, {
+      const response = await this.client.get(`/api/events/user/me`, {
         params: { type },
       })
       return response.data

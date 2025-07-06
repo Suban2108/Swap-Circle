@@ -18,12 +18,14 @@ import messageRouter from "./routes/messageRoutes.js"
 import errorHandler from "./middleware/errorHandlerMiddleware.js"
 
 import 'dotenv/config'
+import { log } from "console";
 
 
 //app config
 const app = express();
 
 const PORT = process.env.PORT || 5005;
+
 
 //middleware
 app.use(cors({
@@ -71,4 +73,6 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log("Frontend URL: ",process.env.FRONTEND_URL);
+  
 });

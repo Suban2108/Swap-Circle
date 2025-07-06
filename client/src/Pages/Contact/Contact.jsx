@@ -10,6 +10,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import HeroSection from "./HeroSection"
+import { useAuth } from "@/context/authContext"
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -29,6 +30,7 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null)
+  const { PORT } = useAuth()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -41,7 +43,7 @@ export default function ContactPage() {
     setSubmitStatus(null)
 
     try {
-      const res = await fetch("http://localhost:5005/api/users/send-contact-query", {
+      const res = await fetch(`${PORT}/api/users/send-contact-query`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
