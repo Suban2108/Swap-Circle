@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  const PORT = 'http://localhost:5005';
+  const PORT = 'https://swap-circle-backend.onrender.com';
   const FRONTEND_PORT = 'http://localhost:3000';
 
   // ✅ Load token/userId from cookies on app load
