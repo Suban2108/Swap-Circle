@@ -12,7 +12,7 @@ import { useItems } from "../../hooks/UseItem"
 import toast from "react-hot-toast"
 import ItemList from "./Components/ItemList"
 import { useAuth } from "@/context/authContext"
-import ConfirmDialog from "@/components/shared/ConfirmDialog"
+import ConfirmDialog from "@/Components/shared/ConfirmDialog"
 import UpdateItemModal from "./Components/UpdateModal"
 
 const MarketplacePage = () => {
