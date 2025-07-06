@@ -120,7 +120,6 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
-        <div className="text-gray-500 text-sm">Loading chat...</div>
       </div>
     )
   }
