@@ -54,7 +54,9 @@ const MessageActionsMenu = ({
       const response = await axios.delete(`${PORT}/api/messages/${messageId}`, {
         data: { userId: currentUserId },
         headers: { "Content-Type": "application/json" },
-      })
+        withCredentials: true, // ✅ Send cookies like token/session
+      });
+
 
       if (response.status === 200) {
         toast.success("Message deleted successfully")

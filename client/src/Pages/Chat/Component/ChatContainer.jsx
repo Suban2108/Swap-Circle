@@ -1,6 +1,6 @@
 "use client"
 
-import React,{ useState } from "react"
+import React, { useState } from "react"
 import ChatSidebar from "./ChatSidebar"
 import ChatList from "./ChatsList"
 import ChatMainWindow from "./ChatMainWindow"
@@ -175,12 +175,18 @@ const ChatContainer = ({ userId, apiUrl, Userdata }) => {
         formData.append("content", caption.trim())
       }
 
-      const response = await axios.post(`${PORT}/api/messages/upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        timeout: 30000,
-      })
+      const response = await axios.post(
+        `${PORT}/api/messages/upload`,
+        formData,
+        {
+          withCredentials: true, // ✅ Put it here, in the config object
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          timeout: 30000,
+        }
+      );
+
 
       if (response.status === 201) {
         await fetchConversationMessages(selectedConversation._id)
