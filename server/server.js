@@ -66,13 +66,6 @@ connectDB();
 // Error handler middleware (should be after all routes)
 app.use(errorHandler)
 
-// Basic route
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Swap Circle' });
-});
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log("Frontend URL: ",process.env.FRONTEND_URL);
-
 });
