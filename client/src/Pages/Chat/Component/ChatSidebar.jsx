@@ -30,9 +30,7 @@ const ChatSidebar = ({
           return
         }
 
-        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
-          withCredentials: true,
-        })
+        const { data } = await axios.get(`${PORT}/api/users/get-user`)
 
         if (data && data._id) {
           setUserData(data)

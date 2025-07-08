@@ -1,150 +1,122 @@
-import User from '../models/userModel.js'
-import path from "path"
-import fs from "fs"
-import nodemailer from 'nodemailer'
+import User from "../models/userModel.js";
+import path from "path";
+import fs from "fs";
+import nodemailer from "nodemailer";
 
-// @desc Get current user from cookie
-// @route GET /api/users/me
+// @desc Get current user from token
 export const getUser = async (req, res) => {
   try {
-    const userId = req.cookies.userId
-    if (!userId) return res.status(401).json({ message: 'Unauthorized. No userId in cookies' })
+    const user = await User.findById(req.user._id)
+      .select("-password")
+      .populate("circleId", "name")
+      .populate("joinedEvents", "title date");
 
-    const user = await User.findById(userId)
-      .select('-password')
-      .populate('circleId', 'name')
-      .populate('joinedEvents', 'title date')
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) return res.status(404).json({ message: 'User not found' })
-
-    res.status(200).json(user)
+    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to get user', error: error.message })
+    res.status(500).json({ message: "Failed to get user", error: error.message });
   }
-}
+};
 
-// @desc Update current user using cookie
-// @route PUT /api/users/me
+// @desc Update current user
 export const updateUser = async (req, res) => {
   try {
-    const userId = req.cookies.userId
-    if (!userId) return res.status(401).json({ message: 'Unauthorized. No userId in cookies' })
-
-    const updates = req.body
+    const updates = req.body;
 
     if (updates.password) {
-      return res.status(400).json({ message: 'Use a dedicated route to update password' })
+      return res.status(400).json({ message: "Use a dedicated route to update password" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      req.user._id,
       { $set: updates },
       { new: true, runValidators: true }
-    ).select('-password')
+    ).select("-password");
 
-    if (!updatedUser) return res.status(404).json({ message: 'User not found' })
+    if (!updatedUser) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json(updatedUser)
+    res.status(200).json(updatedUser);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update user', error: error.message })
+    res.status(500).json({ message: "Failed to update user", error: error.message });
   }
-}
+};
 
-// @desc Delete user using cookie
-// @route DELETE /api/users/me
+// @desc Delete current user
 export const deleteUser = async (req, res) => {
   try {
-    const userId = req.cookies.userId
-    if (!userId) return res.status(401).json({ message: 'Unauthorized. No userId in cookies' })
+    const deletedUser = await User.findByIdAndDelete(req.user._id);
+    if (!deletedUser) return res.status(404).json({ message: "User not found" });
 
-    const deletedUser = await User.findByIdAndDelete(userId)
-
-    if (!deletedUser) return res.status(404).json({ message: 'User not found' })
-
-    res.status(200).json({ message: 'User deleted successfully' })
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete user', error: error.message })
+    res.status(500).json({ message: "Failed to delete user", error: error.message });
   }
-}
+};
 
-// @desc Get users by circleId
-// @route GET /api/users/circle/:circleId
+// @desc Get users by circle ID
 export const getUsersByCircle = async (req, res) => {
   try {
-    const { circleId } = req.params
-
-    const users = await User.find({ circleId }).select('-password')
+    const { circleId } = req.params;
+    const users = await User.find({ circleId }).select("-password");
 
     if (!users.length) {
-      return res.status(404).json({ message: 'No users found in this circle' })
+      return res.status(404).json({ message: "No users found in this circle" });
     }
 
-    res.status(200).json(users)
+    res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch users', error: error.message })
+    res.status(500).json({ message: "Failed to fetch users", error: error.message });
   }
-}
+};
 
-// @desc Upload user profile image using cookie
-// @route POST /api/users/upload
+// @desc Upload avatar image
 export const uploadProfileImage = async (req, res) => {
   try {
-    const userId = req.cookies.userId
-    if (!userId) return res.status(401).json({ message: 'Unauthorized. No userId in cookies' })
+    if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
-    if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded" })
+    const imagePath = `/uploads/${req.file.filename}`;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.avatar?.startsWith("/uploads")) {
+      const oldPath = path.join(process.cwd(), "uploads", path.basename(user.avatar));
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
     }
 
-    const imagePath = `/uploads/${req.file.filename}`
+    user.avatar = imagePath;
+    await user.save();
 
-    const user = await User.findById(userId)
-    if (!user) return res.status(404).json({ message: "User not found" })
-
-    // Remove old image if stored locally
-    if (user.avatar && user.avatar.startsWith("/uploads")) {
-      const oldPath = path.join(process.cwd(), "uploads", path.basename(user.avatar))
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath)
-      }
-    }
-
-    user.avatar = imagePath
-    await user.save()
-
-    const userResponse = user.toObject()
-    delete userResponse.password
+    const userResponse = user.toObject();
+    delete userResponse.password;
 
     res.status(200).json({
       message: "Image uploaded",
       avatar: imagePath,
       user: userResponse,
-    })
+    });
   } catch (err) {
-    console.error("Image upload error:", err)
-    res.status(500).json({ message: "Upload failed", error: err.message })
+    console.error("Image upload error:", err);
+    res.status(500).json({ message: "Upload failed", error: err.message });
   }
-}
+};
 
 // @desc Get user by email
-// @route GET /api/users/email/:email
 export const getUserByEmail = async (req, res) => {
   try {
-    const { email } = req.params
-
+    const { email } = req.params;
     const user = await User.findOne({ email })
-      .select('-password')
-      .populate('circleId', 'name')
-      .populate('joinedEvents', 'title date')
+      .select("-password")
+      .populate("circleId", "name")
+      .populate("joinedEvents", "title date");
 
-    if (!user) return res.status(404).json({ message: 'User not found' })
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json(user)
+    res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch user by email', error: error.message })
+    res.status(500).json({ message: "Failed to fetch user by email", error: error.message });
   }
-}
-
+};
 
 export const sendContactMail = async (req, res) => {
   const { name, email, subject, message, inquiryType } = req.body

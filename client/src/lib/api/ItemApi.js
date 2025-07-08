@@ -7,7 +7,6 @@ class ItemsAPI {
   constructor() {
     this.api = axios.create({
       baseURL: `${API_BASE_URL}/api/items`,
-      withCredentials: true, // ✅ Sends cookies (for JWT auth)
     })
   }
 

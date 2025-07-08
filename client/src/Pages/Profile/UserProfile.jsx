@@ -144,9 +144,7 @@ export default function UserProfile() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
-          withCredentials: true,
-        })
+        const { data } = await axios.get(`${PORT}/api/users/get-user`)
 
         setUserData({
           ...data,
@@ -205,9 +203,7 @@ export default function UserProfile() {
 
     try {
       const { data } = await axios.post(`${PORT}/api/users/upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
-      })
+        headers: { "Content-Type": "multipart/form-data" } })
 
       setUserData((prev) => ({ ...prev, avatar: data.avatar }))
       setShowImageUpload(false)
@@ -225,9 +221,7 @@ export default function UserProfile() {
 
   const handleSaveProfile = async () => {
     try {
-      const response = await axios.put(`${PORT}/api/users/update-user`, userData, {
-        withCredentials: true,
-      })
+      const response = await axios.put(`${PORT}/api/users/update-user`, userData)
 
       setUserData(response.data)
       setIsEditing(false)

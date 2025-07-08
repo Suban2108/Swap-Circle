@@ -22,7 +22,6 @@ import default_banner_image from '../../assets/default_cover_banner_image.webp'
 import { useAuth } from '../../context/authContext'
 import toast from 'react-hot-toast'
 import axios from 'axios'
-import Cookies from 'js-cookie'
 
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -33,7 +32,7 @@ const AwesomeNavbar = () => {
     info: false
   })
 
-  const { PORT, userId, isAuthLoading, setUserId } = useAuth();
+  const { PORT, userId, isAuthLoading, setUserId, token } = useAuth();
   const isLoggedIn = !!userId;
   const location = useLocation()
 
@@ -65,7 +64,11 @@ const AwesomeNavbar = () => {
 
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get(`${PORT}/api/users/get-user`, { withCredentials: true })
+      const { data } = await axios.get(`${PORT}/api/users/get-user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setUserData({
         ...data,
@@ -76,16 +79,18 @@ const AwesomeNavbar = () => {
           twitter: "",
           facebook: "",
         },
-      })
+      });
     } catch (error) {
-      console.error("Failed to fetch user data:", error)
+      console.error("Failed to fetch user data:", error);
     }
-  }
+  };
+
 
   const handleLogout = async () => {
     try {
       console.log("Logging out user...")
-      await axios.post(`${PORT}/api/auth/logout`, {}, { withCredentials: true })
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
 
       toast.success("Logged out successfully!")
       setUserId(null)

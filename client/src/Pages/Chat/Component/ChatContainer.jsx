@@ -179,7 +179,6 @@ const ChatContainer = ({ userId, apiUrl, Userdata }) => {
         `${PORT}/api/messages/upload`,
         formData,
         {
-          withCredentials: true, // ✅ Put it here, in the config object
           headers: {
             "Content-Type": "multipart/form-data",
           },

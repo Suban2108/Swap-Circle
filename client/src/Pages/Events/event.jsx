@@ -42,9 +42,7 @@ export default function EventsPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
-          withCredentials: true,
-        })
+        const { data } = await axios.get(`${PORT}/api/users/get-user`)
 
 
         setUserData({

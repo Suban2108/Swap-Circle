@@ -8,7 +8,6 @@ class ChatAPI {
   constructor() {
     this.api = axios.create({
       baseURL: `${API_BASE_URL}/api`,
-      withCredentials: true, // send cookies with every request
     })
   }
 

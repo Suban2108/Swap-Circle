@@ -6,7 +6,6 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      withCredentials: true, // ✅ This is key for sending cookies
       headers: {
         "Content-Type": "application/json",
       },

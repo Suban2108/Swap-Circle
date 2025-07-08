@@ -27,7 +27,7 @@ const AuthForms = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [mode, setMode] = useState('signin');
 
-    const { PORT } = useAuth();
+    const { PORT, login } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -70,20 +70,19 @@ const AuthForms = () => {
         try {
             const instance = axios.create({
                 baseURL: PORT,
-                withCredentials: true, // ✅ important
             });
 
             if (isRegister) {
                 if (!formValues.role) return toast.error("Please select a role");
                 if (formValues.password !== formValues.confirmPassword) return toast.error("Passwords do not match");
 
-                await instance.post('/api/auth/register', {
+                const { data } =  await instance.post('/api/auth/register', {
                     email: formValues.email,
                     password: formValues.password,
                     name: formValues.fullName,
                     role: formValues.role,
                 });
-
+                login(data.token, data.userId); // ✅ store in localStorage
                 toast.success("Registration successful!");
                 setTimeout(() => (window.location.href = "/"), 1500);
             }
@@ -91,14 +90,15 @@ const AuthForms = () => {
             if (isLogin) {
                 if (!formValues.role) return toast.error("Please select a role");
 
-                await instance.post('/api/auth/login', {
+                const { data } = await axios.post(`${PORT}/api/auth/login`, {
                     email: formValues.email,
                     password: formValues.password,
                     role: formValues.role,
                 });
 
+                login(data.token, data.userId); // ✅ store in localStorage
                 toast.success("Login successful!");
-                setTimeout(() => (window.location.href = "/"), 1500);
+                navigate('/');
             }
 
             if (isForgotPassword) {
@@ -156,13 +156,15 @@ const AuthForms = () => {
                                 <GoogleLogin
                                     onSuccess={async (credentialResponse) => {
                                         try {
-                                            const res = await axios.post(`${PORT}/api/auth/google`,
-                                                { token: credentialResponse.credential, },
-                                                { withCredentials: true });
+                                            const res = await axios.post(`${PORT}/api/auth/google`, {
+                                                token: credentialResponse.credential,
+                                            });
+                                            const { token, userId } = res.data;
+
+                                            login(token, userId); // ✅ store in localStorage
                                             toast.success('Logged in with Google!');
-                                            setTimeout(() => {
-                                                window.location.href = '/';
-                                            }, 1500);
+                                            navigate('/');
+
                                         } catch (err) {
                                             toast.error('Google login failed');
                                             console.error('Google Login failed:', err);
