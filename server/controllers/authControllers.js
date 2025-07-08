@@ -43,7 +43,7 @@ const registerByEmail = async (req, res) => {
     console.log("[Register] Token:", token)
 
     res.cookie("token", token, {
-      COOKIE_OPTIONS,
+      ...COOKIE_OPTIONS,
       domain: '.onrender.com',
     })
     res.cookie("userId", user._id.toString(), {
@@ -81,7 +81,7 @@ const loginByEmail = async (req, res) => {
     )
 
     res.cookie("token", token, {
-      COOKIE_OPTIONS,
+      ...COOKIE_OPTIONS,
       domain: '.onrender.com',
     })
     res.cookie("userId", user._id.toString(), {
@@ -142,7 +142,7 @@ const googleByLogin = async (req, res) => {
     )
 
     res.cookie("token", authToken, {
-      COOKIE_OPTIONS,
+      ...COOKIE_OPTIONS,
       domain: '.onrender.com',
     })
     res.cookie("userId", user._id.toString(), {
@@ -169,7 +169,7 @@ const googleByLogin = async (req, res) => {
 // LOGOUT
 const logoutUser = (req, res) => {
   res.clearCookie("token", {
-    COOKIE_OPTIONS,
+    ...COOKIE_OPTIONS,
     domain: '.onrender.com',
   })
   res.clearCookie("userId", {

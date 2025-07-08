@@ -26,12 +26,11 @@ const app = express();
 
 const PORT = 5005;
 
-const allowedOrigins = ['https://swap-circle-frontend.onrender.com'];
-
 app.use(cors({
-  origin: allowedOrigins,
+  origin: "https://swap-circle-frontend.onrender.com",  // exact match
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

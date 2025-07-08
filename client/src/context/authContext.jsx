@@ -1,25 +1,36 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import Cookies from 'js-cookie';
+import axios from 'axios';
 
-// 1. Create the Context
 const AuthContext = createContext();
 
-// 2. Provider Component
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(null); // optional now
   const [userId, setUserId] = useState(null);
 
   const PORT = 'https://swap-circle-backend.onrender.com';
-  const FRONTEND_PORT = 'http://localhost:3000';
+  const FRONTEND_PORT = 'https://swap-circle-frontend.onrender.com';
 
-  // ✅ Load token/userId from cookies on app load
+  // ✅ Check if user is authenticated via backend
   useEffect(() => {
-    const cookieToken = Cookies.get('token'); // will be undefined if httpOnly
-    const cookieUserId = Cookies.get('userId');
+    const checkAuth = async () => {
+      try {
+        const { data } = await axios.get(`${PORT}/api/users/get-user`, {
+          withCredentials: true,
+        });
 
-    setToken(cookieToken || null);     // still useful for non-httpOnly cookies
-    setUserId(cookieUserId || null);
+        if (data?._id) {
+          setUserId(data._id);
+          setToken('valid'); // Optional, just marks login
+        }
+      } catch (err) {
+        console.log("Not authenticated", err.message);
+        setUserId(null);
+        setToken(null);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   return (
@@ -29,5 +40,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 3. Custom Hook
 export const useAuth = () => useContext(AuthContext);

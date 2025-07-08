@@ -29,8 +29,12 @@ const AwesomeNavbar = () => {
   const [scrolled, setScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
+  const [mobileDropdowns, setMobileDropdowns] = useState({
+    explore: false,
+    info: false
+  })
 
-  const { PORT, userId } = useAuth()
+  const { PORT } = useAuth()
   const location = useLocation()
 
   useEffect(() => {
@@ -40,13 +44,15 @@ const AwesomeNavbar = () => {
   }, [])
 
   useEffect(() => {
+    const userId = Cookies.get('userId')
+
     if (userId) {
       setIsLoggedIn(true)
       fetchUser(userId)
     } else {
       setIsLoggedIn(false)
     }
-  }, [userId])
+  }, [])
 
   const fetchUser = async (userId) => {
     try {
@@ -105,8 +111,39 @@ const AwesomeNavbar = () => {
     )
   }
 
+  const MobileNavLink = ({ to, icon: Icon, label, onClick }) => {
+    const isActive = location.pathname === to
+    return (
+      <Link
+        to={to}
+        onClick={onClick}
+        className={`flex items-center gap-3 px-4 py-3 text-base font-medium transition-colors duration-300 ${
+          isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+        }`}
+      >
+        {Icon && <Icon className="w-5 h-5" />}
+        {label}
+      </Link>
+    )
+  }
+
+  const toggleMobileDropdown = (dropdown) => {
+    setMobileDropdowns(prev => ({
+      ...prev,
+      [dropdown]: !prev[dropdown]
+    }))
+  }
+
+  const closeMobileMenu = () => {
+    setIsOpen(false)
+    setMobileDropdowns({
+      explore: false,
+      info: false
+    })
+  }
+
   return (
-    <nav className={`fixed top-0 w-full z-100 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'}`}>
+    <nav className={`fixed top-0 w-full z-50 border-b-3 border-orange-600 transition-all duration-500 ${scrolled ? 'bg-transparent backdrop-blur-md' : 'bg-background'}`}>
       <div className="max-w-[95%] mx-auto py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -117,7 +154,7 @@ const AwesomeNavbar = () => {
               </div>
               <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-[#077FBA] rounded-sm blur opacity-30 group-hover:opacity-60 transition" />
             </Link>
-            <span className="text-2xl font-bold font-montserrat bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
+            <span className="text-xl sm:text-2xl font-bold font-montserrat bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent">
               Swap-Circle
             </span>
           </div>
@@ -209,6 +246,146 @@ const AwesomeNavbar = () => {
             </Button>
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200 z-40">
+            <div className="py-2">
+              <MobileNavLink to="/" icon={Home} label="Home" onClick={closeMobileMenu} />
+              <MobileNavLink to="/groups" icon={Users} label="Groups" onClick={closeMobileMenu} />
+              
+              {/* Mobile Explore Dropdown */}
+              <div className="border-t border-gray-100">
+                <button
+                  onClick={() => toggleMobileDropdown('explore')}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium transition-colors duration-300 ${
+                    isPathMatch(['/items', '/events']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <LayoutListIcon className="w-5 h-5" />
+                    Explore
+                  </div>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileDropdowns.explore ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileDropdowns.explore && (
+                  <div className="bg-gray-50">
+                    <Link
+                      to="/items"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-3 px-8 py-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+                    >
+                      <ListTodo className="w-4 h-4" />
+                      Items
+                    </Link>
+                    <Link
+                      to="/events"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-3 px-8 py-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+                    >
+                      <CalendarClock className="w-4 h-4" />
+                      Events
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Info Dropdown */}
+              <div className="border-t border-gray-100">
+                <button
+                  onClick={() => toggleMobileDropdown('info')}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium transition-colors duration-300 ${
+                    isPathMatch(['/about', '/contact']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Info className="w-5 h-5" />
+                    Info
+                  </div>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${mobileDropdowns.info ? 'rotate-180' : ''}`} />
+                </button>
+                {mobileDropdowns.info && (
+                  <div className="bg-gray-50">
+                    <Link
+                      to="/about"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-3 px-8 py-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+                    >
+                      <BadgeInfoIcon className="w-4 h-4" />
+                      About
+                    </Link>
+                    <Link
+                      to="/contact"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-3 px-8 py-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+                    >
+                      <UserRoundPen className="w-4 h-4" />
+                      Contact
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile User Section */}
+              <div className="border-t border-gray-100 pt-2">
+                {isLoggedIn ? (
+                  <>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <img
+                        src={`${PORT}${userData?.avatar}` || default_user_image}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full border-2 border-orange-300"
+                        onError={(e) => {
+                          e.target.src = default_user_image
+                        }}
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        {userData?.username || 'User'}
+                      </span>
+                    </div>
+                    <Link
+                      to="/dashboard"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/profile"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50"
+                    >
+                      <CircleUser className="w-4 h-4" />
+                      Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout()
+                        closeMobileMenu()
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                    >
+                      <LogOutIcon className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <div className="px-4 py-3">
+                    <Link to="/login?mode=signin" onClick={closeMobileMenu}>
+                      <Button
+                        variant="default"
+                        className="w-full bg-gradient-to-r from-[#077FBA] to-orange-500 text-white"
+                      >
+                        Sign up
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   )
