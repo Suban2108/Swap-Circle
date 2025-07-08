@@ -20,7 +20,11 @@ export default function ChatPage() {
           return
         }
 
-        const { data } = await axios.get(`${PORT}/api/users/get-user`)
+        const { data } = await axios.get(`${PORT}/api/users/get-user`,{
+          headers:{
+            Authorization: `Bearer ${token}`,
+          }
+        })
 
         console.log("[ChatPage] Data fetched from cookie-based auth:", data.avatar)
 

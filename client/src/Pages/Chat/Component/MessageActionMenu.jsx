@@ -53,7 +53,9 @@ const MessageActionsMenu = ({
     try {
       const response = await axios.delete(`${PORT}/api/messages/${messageId}`, {
         data: { userId: currentUserId },
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
       });
 
 

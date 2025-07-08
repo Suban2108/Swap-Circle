@@ -30,7 +30,13 @@ const ChatSidebar = ({
           return
         }
 
-        const { data } = await axios.get(`${PORT}/api/users/get-user`)
+        const { data } = await axios.get(`${PORT}/api/users/get-user`,
+          {
+            headers:{
+              Authorization: `Bearer ${token}`,
+            }
+          }
+        )
 
         if (data && data._id) {
           setUserData(data)

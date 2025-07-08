@@ -181,6 +181,7 @@ const ChatContainer = ({ userId, apiUrl, Userdata }) => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
           },
           timeout: 30000,
         }

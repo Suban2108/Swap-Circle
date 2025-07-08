@@ -7,6 +7,9 @@ class ItemsAPI {
   constructor() {
     this.api = axios.create({
       baseURL: `${API_BASE_URL}/api/items`,
+        headers:{
+          Authorization: `Bearer ${token}`,
+        }
     })
   }
 

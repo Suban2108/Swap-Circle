@@ -8,8 +8,11 @@ const api = axios.create({
 });
 
 export const getCurrentUser = async () => {
-  return await axios.get(`${BASE_URL}/api/users/me`, {
-  })
+  return await axios.get(`${BASE_URL}/api/users/me`,
+    {headers:{
+      Authorization: `Bearer ${token}`,
+    }}
+  )
 }
 
 export const updateUserProfile = async (userData) => {
