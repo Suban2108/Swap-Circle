@@ -34,7 +34,7 @@ const AwesomeNavbar = () => {
     info: false
   })
 
-  const { PORT } = useAuth()
+  const { PORT, userId } = useAuth()
   const location = useLocation()
 
   useEffect(() => {
@@ -44,17 +44,15 @@ const AwesomeNavbar = () => {
   }, [])
 
   useEffect(() => {
-    const userId = Cookies.get('userId')
-
     if (userId) {
-      setIsLoggedIn(true)
-      fetchUser(userId)
+      setIsLoggedIn(true);
+      fetchUser();
     } else {
-      setIsLoggedIn(false)
+      setIsLoggedIn(false);
     }
-  }, [])
+  }, [userId]);
 
-  const fetchUser = async (userId) => {
+  const fetchUser = async () => {
     try {
       console.log("Fetching user info for ID:", userId)
       const { data } = await axios.get(`${PORT}/api/users/get-user`, { withCredentials: true })
@@ -78,9 +76,6 @@ const AwesomeNavbar = () => {
     try {
       console.log("Logging out user...")
       await axios.post(`${PORT}/api/auth/logout`, {}, { withCredentials: true })
-
-      Cookies.remove('token')
-      Cookies.remove('userId')
 
       toast.success("Logged out successfully!")
       setIsLoggedIn(false)
@@ -117,9 +112,8 @@ const AwesomeNavbar = () => {
       <Link
         to={to}
         onClick={onClick}
-        className={`flex items-center gap-3 px-4 py-3 text-base font-medium transition-colors duration-300 ${
-          isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
-        }`}
+        className={`flex items-center gap-3 px-4 py-3 text-base font-medium transition-colors duration-300 ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+          }`}
       >
         {Icon && <Icon className="w-5 h-5" />}
         {label}
@@ -253,14 +247,13 @@ const AwesomeNavbar = () => {
             <div className="py-2">
               <MobileNavLink to="/" icon={Home} label="Home" onClick={closeMobileMenu} />
               <MobileNavLink to="/groups" icon={Users} label="Groups" onClick={closeMobileMenu} />
-              
+
               {/* Mobile Explore Dropdown */}
               <div className="border-t border-gray-100">
                 <button
                   onClick={() => toggleMobileDropdown('explore')}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium transition-colors duration-300 ${
-                    isPathMatch(['/items', '/events']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
-                  }`}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium transition-colors duration-300 ${isPathMatch(['/items', '/events']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <LayoutListIcon className="w-5 h-5" />
@@ -294,9 +287,8 @@ const AwesomeNavbar = () => {
               <div className="border-t border-gray-100">
                 <button
                   onClick={() => toggleMobileDropdown('info')}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium transition-colors duration-300 ${
-                    isPathMatch(['/about', '/contact']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
-                  }`}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-base font-medium transition-colors duration-300 ${isPathMatch(['/about', '/contact']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <Info className="w-5 h-5" />
