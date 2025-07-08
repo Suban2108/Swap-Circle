@@ -27,14 +27,14 @@ import Cookies from 'js-cookie'
 const AwesomeNavbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
   const [mobileDropdowns, setMobileDropdowns] = useState({
     explore: false,
     info: false
   })
 
-  const { PORT, userId } = useAuth()
+  const { PORT, userId, isAuthLoading, setUserId } = useAuth();
+  const isLoggedIn = !!userId;
   const location = useLocation()
 
   useEffect(() => {
@@ -43,15 +43,24 @@ const AwesomeNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+
+
   useEffect(() => {
-    if (userId) {
-      setIsLoggedIn(true);
+    if (!isAuthLoading && userId) {
       fetchUser();
-    } else {
-      setIsLoggedIn(false);
     }
-  }, [userId]);
-      console.log("Fetching user info for ID:", userId)
+  }, [userId, isAuthLoading]);
+
+
+  useEffect(() => {
+    if (isAuthLoading) {
+      console.log("Auth check in progress...");
+    } else if (userId) {
+      console.log("User authenticated with ID:", userId);
+    } else {
+      console.log("No authenticated user.");
+    }
+  }, [isAuthLoading, userId]);
 
 
   const fetchUser = async () => {
@@ -79,7 +88,7 @@ const AwesomeNavbar = () => {
       await axios.post(`${PORT}/api/auth/logout`, {}, { withCredentials: true })
 
       toast.success("Logged out successfully!")
-      setIsLoggedIn(false)
+      setUserId(null)
 
       setTimeout(() => {
         window.location.href = "/"

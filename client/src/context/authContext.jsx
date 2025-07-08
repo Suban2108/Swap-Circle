@@ -10,8 +10,8 @@ export const AuthProvider = ({ children }) => {
 
   const PORT = 'https://swap-circle-backend.onrender.com';
   const FRONTEND_PORT = 'https://swap-circle-frontend.onrender.com';
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  // ✅ Check if user is authenticated via backend
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -21,22 +21,25 @@ export const AuthProvider = ({ children }) => {
 
         if (data?._id) {
           setUserId(data._id);
-          setToken('valid'); // Optional, just marks login
+        } else {
+          setUserId(null);
         }
       } catch (err) {
-        console.log("Not authenticated", err.message);
         setUserId(null);
-        setToken(null);
+      } finally {
+        setIsAuthLoading(false); // ✅ done checking
       }
     };
 
     checkAuth();
   }, []);
 
+
   return (
-    <AuthContext.Provider value={{ token, userId, PORT, FRONTEND_PORT, setUserId }}>
+    <AuthContext.Provider value={{ token, userId, PORT, FRONTEND_PORT, setUserId, isAuthLoading }}>
       {children}
     </AuthContext.Provider>
+
   );
 };
 
