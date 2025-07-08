@@ -84,6 +84,8 @@ const AwesomeNavbar = () => {
       console.error("Failed to fetch user data:", error);
     }
   };
+  console.log("UserData from navbar.jsx: ",userData);
+  
 
 
   const handleLogout = async () => {
