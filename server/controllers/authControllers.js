@@ -17,8 +17,8 @@ const transporter = nodemailer.createTransport({
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // ⛔ false if NODE_ENV is not set
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: true,
+  sameSite: None,
   maxAge: 24 * 60 * 60 * 1000,
 }
 
