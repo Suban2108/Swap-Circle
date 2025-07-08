@@ -20,7 +20,7 @@ const MessageActionsMenu = ({
   const [isOpen, setIsOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const { PORT } = useAuth()
+  const { PORT, token } = useAuth()
 
   const handleCopyText = () => {
     if (content) {

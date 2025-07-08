@@ -139,7 +139,7 @@ export default function UserProfile() {
   const [imageToCrop, setImageToCrop] = useState(null)
   const [isAdmin, setIsAdmin] = useState(null)
 
-  const { PORT, userId } = useAuth()
+  const { PORT, userId, token } = useAuth()
 
   useEffect(() => {
     const fetchUser = async () => {

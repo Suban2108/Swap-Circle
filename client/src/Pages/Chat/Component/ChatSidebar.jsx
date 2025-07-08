@@ -15,7 +15,7 @@ const ChatSidebar = ({
   Userdata, // Optional fallback
 }) => {
   const location = useLocation()
-  const { PORT, userId: contextUserId } = useAuth()
+  const { PORT, userId: contextUserId, token } = useAuth()
 
   const [userData, setUserData] = useState(Userdata || null)
   const [loading, setLoading] = useState(true)

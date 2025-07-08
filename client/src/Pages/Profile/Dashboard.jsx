@@ -32,7 +32,7 @@ export default function SwapCircleDashboard() {
     const [loading, setLoading] = useState(true);
 
 
-    const { PORT, userId } = useAuth()
+    const { PORT, userId, token } = useAuth()
     const location = useLocation();
     const USER_ID = userId
 

@@ -2,6 +2,8 @@
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL; // or from .env
+const token = localStorage.getItem('token');
+
 
 const api = axios.create({
   baseURL: BASE_URL,

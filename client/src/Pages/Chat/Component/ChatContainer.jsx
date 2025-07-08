@@ -15,7 +15,7 @@ const ChatContainer = ({ userId, apiUrl, Userdata }) => {
   const [selectedConversation, setSelectedConversation] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMobileListOpen, setIsMobileListOpen] = useState(false)
-  const { PORT } = useAuth()
+  const { PORT, token } = useAuth()
 
   const {
     messages,

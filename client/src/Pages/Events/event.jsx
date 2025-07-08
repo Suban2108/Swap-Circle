@@ -37,7 +37,7 @@ export default function EventsPage() {
   })
   const [joinedEvents, setJoinedEvents] = useState(new Set())
   const [userData, setUserData] = useState(null)
-  const { userId, user, PORT } = useAuth()
+  const { userId, user, PORT, token } = useAuth()
 
   useEffect(() => {
     const fetchUser = async () => {

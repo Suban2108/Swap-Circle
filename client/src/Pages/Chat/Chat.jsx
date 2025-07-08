@@ -9,7 +9,7 @@ import axios from 'axios'
 export default function ChatPage() {
   const [loading, setLoading] = useState(true)
   const [userData, setUserData] = useState(null) // <-- NEW
-  const { PORT, userId } = useAuth()
+  const { PORT, userId, token } = useAuth()
 
   useEffect(() => {
     const fetchUser = async () => {
