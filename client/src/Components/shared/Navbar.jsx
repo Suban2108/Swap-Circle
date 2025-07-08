@@ -51,10 +51,11 @@ const AwesomeNavbar = () => {
       setIsLoggedIn(false);
     }
   }, [userId]);
+      console.log("Fetching user info for ID:", userId)
+
 
   const fetchUser = async () => {
     try {
-      console.log("Fetching user info for ID:", userId)
       const { data } = await axios.get(`${PORT}/api/users/get-user`, { withCredentials: true })
 
       setUserData({
