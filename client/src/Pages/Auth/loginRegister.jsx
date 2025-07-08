@@ -98,7 +98,7 @@ const AuthForms = () => {
                 });
 
                 toast.success("Login successful!");
-                setTimeout(() => navigate('/'), 1500);
+                setTimeout(() => (window.location.href = "/"), 1500);
             }
 
             if (isForgotPassword) {
