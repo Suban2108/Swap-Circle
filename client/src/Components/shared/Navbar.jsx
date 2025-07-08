@@ -91,9 +91,6 @@ const AwesomeNavbar = () => {
   const handleLogout = async () => {
     try {
       console.log("Logging out user...")
-      localStorage.removeItem("token");
-      localStorage.removeItem("userId");
-
       toast.success("Logged out successfully!")
       logout()
 
