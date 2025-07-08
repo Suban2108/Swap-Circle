@@ -32,7 +32,7 @@ const AwesomeNavbar = () => {
     info: false
   })
 
-  const { PORT, userId, isAuthLoading, setUserId, token } = useAuth();
+  const { PORT, userId, isAuthLoading, token, logout } = useAuth();
   const isLoggedIn = !!userId;
   const location = useLocation()
 
@@ -95,7 +95,7 @@ const AwesomeNavbar = () => {
       localStorage.removeItem("userId");
 
       toast.success("Logged out successfully!")
-      setUserId(null)
+      logout()
 
       setTimeout(() => {
         window.location.href = "/"
