@@ -1,16 +1,16 @@
 import axios from "axios"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const token = localStorage.getItem('token');
 
 
 class ApiClient {
+
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     })
   }

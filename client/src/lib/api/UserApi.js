@@ -2,7 +2,6 @@
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL; // or from .env
-const token = localStorage.getItem('token');
 
 
 const api = axios.create({
@@ -12,7 +11,7 @@ const api = axios.create({
 export const getCurrentUser = async () => {
   return await axios.get(`${BASE_URL}/api/users/me`,
     {headers:{
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
     }}
   )
 }

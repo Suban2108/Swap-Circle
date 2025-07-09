@@ -2,7 +2,6 @@
 import axios from "axios"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const token = localStorage.getItem('token');
 
 
 class ItemsAPI {
@@ -10,7 +9,7 @@ class ItemsAPI {
     this.api = axios.create({
       baseURL: `${API_BASE_URL}/api/items`,
         headers:{
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         }
     })
   }

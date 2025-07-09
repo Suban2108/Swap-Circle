@@ -2,7 +2,6 @@ import axios from "axios"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const token = localStorage.getItem('token');
 
 
 
@@ -12,7 +11,7 @@ class ChatAPI {
     this.api = axios.create({
       baseURL: `${API_BASE_URL}/api`,
       headers:{
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       }
     })
   }
