@@ -1,5 +1,5 @@
 # Swap-Circle
 
-The Deployment is not working as of now due to a deployment issue with respect to the Backend. Sorry for the inconvenience.
+# In the Deployed project, some of the API are not working properly due to an issue.
 
 render: https://swap-circle-frontend.onrender.com/
