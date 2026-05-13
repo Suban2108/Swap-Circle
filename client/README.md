@@ -1,12 +1,75 @@
-# React + Vite
+# Swap-Circle Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend application for Swap-Circle, a community exchange platform where users can list items, request swaps, join groups, chat, and manage profiles/events.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React + Vite
+- Tailwind CSS
+- React Router
+- Axios + Fetch API
+- React Hot Toast
+- Leaflet (map view on Contact page)
 
-## Expanding the ESLint configuration
+## Core Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Authentication with role-based login/signup
+  - Email/password login
+  - Google login
+  - Forgot/reset password flows
+- Marketplace
+  - Browse items in grid/list mode
+  - Search, category/type/status filters
+  - Like, edit, and delete owned items
+  - Create and update item listings with image uploads
+  - Send swap requests
+- Chat and Groups
+  - Group and direct conversations
+  - Create/join groups
+  - Real-time style message interface with file upload support
+- Profile and Dashboard
+  - User profile with editable details and social links
+  - Profile image upload and crop
+  - Dashboard sections for overview, users, items, events, and analytics
+- Events
+  - Browse and filter events
+  - Event details and event management actions
+- Informational pages
+  - Home, About, and Contact pages
+  - Contact form submission and community map
+
+## Routes
+
+- `/` - Home
+- `/login` - Auth (signin/signup/forgot/reset)
+- `/about` - About Swap-Circle
+- `/contact` - Contact page
+- `/profile` - User profile
+- `/dashboard` - Admin/community dashboard
+- `/groups` - Group and direct chat
+- `/items` - Marketplace
+- `/events` - Events
+
+## Getting Started
+
+1. Install dependencies:
+   - `npm install`
+2. Start development server:
+   - `npm run dev`
+3. Build for production:
+   - `npm run build`
+4. Preview production build locally:
+   - `npm run preview`
+
+## Project Structure (High Level)
+
+- `src/Pages` - page-level modules
+- `src/Components` - shared UI and reusable components
+- `src/routes` - route definitions
+- `src/hooks` - data and state hooks
+- `src/lib/api` - API layer utilities
+- `src/context` - auth and app context providers
+
+## Screenshot / Demo Image
+
+Add your image hyperlink here: `[Project Screenshot](PASTE_IMAGE_URL_HERE)`

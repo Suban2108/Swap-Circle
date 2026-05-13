@@ -2,10 +2,10 @@
 
 .marquee-columns {
   display: flex;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   gap: 1rem;
-  padding: 2rem;
+  padding: 1rem;
   /* box-sizing: border-box; */
 }
 
@@ -13,6 +13,7 @@
   flex: 1;
   overflow: hidden;
   position: relative;
+  min-height: 180px;
 }
 
 .marquee-track {
@@ -21,6 +22,16 @@
   align-items: center;
   gap: 2rem;
   animation: scrollUp 20s linear infinite;
+}
+
+@media (min-width: 768px) {
+  .marquee-columns {
+    padding: 2rem;
+  }
+
+  .marquee-column {
+    min-height: auto;
+  }
 }
 
 .marquee-track.reverse {

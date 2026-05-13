@@ -273,14 +273,14 @@ export default function UserProfile() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Cover Image */}
-      <div className="relative h-80 bg-gradient-to-r from-blue-600 to-blue-600">
+      <div className="relative h-56 sm:h-72 md:h-80 bg-gradient-to-r from-blue-600 to-blue-600">
         <img src={default_banner_image} alt="Cover" className="w-full h-full object-cover opacity-50" />
       </div>
 
       {/* Profile Card */}
       <div className="max-w-4xl mx-auto px-4 -mt-20 relative z-10">
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex items-start space-x-6">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row items-start gap-4 sm:gap-6">
             {/* Avatar and Admin Badge */}
             <div className="relative">
               <img
@@ -431,18 +431,18 @@ export default function UserProfile() {
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-auto">
               {isEditing ? (
                 <>
                   <button
                     onClick={handleSaveProfile}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center justify-center gap-2 flex-1"
                   >
                     <Save className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 flex items-center gap-2"
+                    className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 flex items-center justify-center gap-2 flex-1"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -451,16 +451,16 @@ export default function UserProfile() {
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 flex items-center gap-2"
+                    className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 flex items-center justify-center gap-2 flex-1"
                     title="Edit profile"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
-                  <button className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 flex items-center gap-2" title="Share">
+                  <button className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 flex items-center justify-center gap-2 flex-1" title="Share">
                     <Share2 className="w-4 h-4" />
                   </button>
                   <Link to="/dashboard">
-                    <button className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500 flex items-center gap-2" title="Back to Dashboard">
+                    <button className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-500 flex items-center justify-center gap-2 w-full" title="Back to Dashboard">
                       <LayoutDashboard className="w-4 h-4 text-white" />
                     </button>
                   </Link>
@@ -474,8 +474,8 @@ export default function UserProfile() {
 
       {/* Tabs */}
       <div className="px-4 mt-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border p-1">
-          <nav className="flex space-x-1">
+        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border p-1 overflow-x-auto">
+          <nav className="flex space-x-1 min-w-max">
             {tabItems.map((tab) => (
               <button
                 key={tab.id}

@@ -186,12 +186,12 @@ const ChatList = ({
   return (
     <>
       {isMobileListOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 mt-20 z-40 md:hidden" onClick={onCloseMobileList} />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onClick={onCloseMobileList} />
       )}
 
       <div
-        className={`fixed md:relative top-0 left-0 z-50 md:z-auto h-full w-full sm:w-80 md:w-80 flex-shrink-0 flex flex-col bg-gradient-to-b from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-900 border-r border-blue-200 dark:border-blue-800 transform transition-transform duration-300 ease-in-out ${
-          isMobileListOpen ? "translate-x-0 mt-15" : "-translate-x-full md:translate-x-0"
+        className={`fixed md:relative top-16 md:top-0 left-0 z-50 md:z-auto h-[calc(100dvh-4rem)] md:h-full w-full sm:w-80 md:w-80 flex-shrink-0 flex flex-col bg-gradient-to-b from-blue-50 to-orange-50 dark:from-blue-950 dark:to-orange-900 border-r border-blue-200 dark:border-blue-800 transform transition-transform duration-300 ease-in-out ${
+          isMobileListOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         <div className="p-4 border-b border-blue-200 dark:border-blue-800">

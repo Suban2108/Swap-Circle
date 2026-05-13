@@ -259,7 +259,7 @@ const ChatContainer = ({ userId, apiUrl, Userdata }) => {
       : directConversations.map(transformConversationForUI)
 
   return (
-    <div className="h-screen md:h-[700px] md:mt-16 mt-16 flex bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950 overflow-hidden">
+    <div className="mt-16 h-[calc(100dvh-4rem)] md:h-[700px] flex bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-orange-950 dark:via-slate-900 dark:to-blue-950 overflow-hidden">
       <ChatSidebar
         selected={mode}
         onSelect={setMode}

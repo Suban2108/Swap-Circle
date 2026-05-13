@@ -111,7 +111,7 @@ export default function SwapCircleDashboard() {
 
             {/* Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 w-64 mt-17 bg-white shadow-xl transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed inset-y-0 left-0 w-64 top-16 lg:top-0 bg-white shadow-xl transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
                     } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
             >
                 <div className="flex items-center justify-between h-16 px-6 border-b border-orange-500">
@@ -178,7 +178,7 @@ export default function SwapCircleDashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="w-full mt-13">
+            <div className="w-full mt-16 lg:mt-0">
                 {/* Top Header */}
                 <header className="bg-white shadow-sm ">
                     <div className="flex items-center justify-between h-20 px-6 py-5">

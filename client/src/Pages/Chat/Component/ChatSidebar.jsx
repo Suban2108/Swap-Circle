@@ -67,15 +67,15 @@ const ChatSidebar = ({
 
       <div
         className={`
-          fixed md:relative top-0 left-0 z-50 md:z-auto
-          h-full w-20 flex-shrink-0
+          fixed md:relative top-16 md:top-0 left-0 z-50 md:z-auto
+          h-[calc(100dvh-4rem)] md:h-full w-20 flex-shrink-0
           flex flex-col items-center justify-between 
           bg-gradient-to-b from-orange-100 to-blue-100 
           dark:from-orange-900 dark:to-blue-900 
           py-4 md:py-6 space-y-4 md:space-y-6 
           border-r border-orange-200 dark:border-orange-800
           transform transition-transform duration-300 ease-in-out
-          ${isMobileMenuOpen ? "translate-x-0 mt-16" : "-translate-x-full md:translate-x-0"}
+          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
         <button

@@ -284,7 +284,7 @@ export default function ContactPage() {
               <MapPin className="w-8 h-8 text-blue-600 mr-3" />
               Community Locations
             </h2>
-            <div className="overflow-hidden rounded-2xl h-[600px]">
+            <div className="overflow-hidden rounded-2xl h-[320px] sm:h-[420px] lg:h-[600px]">
               <MapContainer center={[22.9734, 78.6569]} zoom={5} className="h-full w-full z-10">
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'

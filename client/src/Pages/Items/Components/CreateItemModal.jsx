@@ -243,8 +243,8 @@ const CreateItemModal = ({ isOpen, onClose, onSubmit, loading = false }) => {
   }
 
   return (
-    <div className="fixed mt-5 inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-[400px] z-50">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[100vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center p-3 sm:p-4 pt-20 sm:pt-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90dvh] overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
           <div className="flex items-center justify-between">

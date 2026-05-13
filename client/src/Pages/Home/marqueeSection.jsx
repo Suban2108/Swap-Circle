@@ -17,14 +17,14 @@ const logos = [
 ]
 
 const MarqueeColumn = ({ reverse = false, columnIndex }) => (
-  <div className="marquee-column mx-2 h-[47%] p-5">
+  <div className="marquee-column mx-1 sm:mx-2 p-3 sm:p-5">
     <div className={`marquee-track ${reverse ? 'reverse' : ''} `}>
       {[...logos, ...logos].map((src, i) => (
         <img
           key={`${columnIndex}-${i}`}
           src={src}
           alt={`logo-${i}`}
-          className="w-20 h-20 object-contain transition logo-hover rounded-[20%]"
+          className="w-14 h-14 sm:w-20 sm:h-20 object-contain transition logo-hover rounded-[20%]"
         />
       ))}
     </div>
@@ -34,14 +34,14 @@ const MarqueeColumn = ({ reverse = false, columnIndex }) => (
 const MarqueeSection = () => {
   return (
     <section className="w-full flex items-center justify-center py-16 bg-background">
-      <div className="w-full max-w-7xl h-[400px] flex flex-col md:flex-row overflow-hidden rounded-2xl shadow-lg border border-muted bg-card">
+      <div className="w-full max-w-7xl min-h-[420px] md:h-[400px] flex flex-col md:flex-row overflow-hidden rounded-2xl shadow-lg border border-muted bg-card">
         
         {/* Left Content */}
-        <div className="md:w-3/5 w-full p-10 flex flex-col justify-center space-y-6">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
+        <div className="md:w-3/5 w-full p-6 sm:p-10 flex flex-col justify-center space-y-4 sm:space-y-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 sm:mb-6 bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 dark:from-white dark:via-blue-200 dark:to-purple-200 bg-clip-text text-transparent">
             Trusted by the World's Leading Teams
           </h2>
-          <p className="text-lg text-muted-foreground max-w-xl">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-xl">
             Join companies around the globe that use our platform to build, innovate, and lead. Our solutions are powering real impact every day.
           </p>
           <Button className="w-fit" variant="default">
@@ -50,7 +50,7 @@ const MarqueeSection = () => {
         </div>
 
         {/* Right Content - Marquee */}
-        <div className="md:w-2/5 w-full animate-gradient bg-gradient-to-r from-blue-800 to-red-900 bg-[length:200%_200%] border-l border-muted rounded-r-2xl">
+        <div className="md:w-2/5 w-full min-h-[220px] md:min-h-0 animate-gradient bg-gradient-to-r from-blue-800 to-red-900 bg-[length:200%_200%] md:border-l border-t md:border-t-0 border-muted md:rounded-r-2xl">
           <div className="marquee-columns">
             <MarqueeColumn columnIndex={1} />
             <MarqueeColumn reverse columnIndex={2} />

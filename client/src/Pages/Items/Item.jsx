@@ -193,18 +193,18 @@ const MarketplacePage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 mt-16">
             {/* Hero Section */}
-            <div className="mx-auto px-2 py-8 border border-red-500">
-                <div className="bg-gradient-to-r from-orange-600 via-yellow-600 to-orange-800 text-white rounded-2xl p-8 mb-8 mx-[85px]">
-                    <div className="flex justify-between items-center flex-wrap h-30">
+            <div className="mx-auto px-4 sm:px-6 py-8">
+                <div className="bg-gradient-to-r from-orange-600 via-yellow-600 to-orange-800 text-white rounded-2xl p-6 sm:p-8 mb-8 max-w-7xl mx-auto">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                         <div className="max-w-xl">
-                            <h1 className="text-4xl font-bold mb-2">Swap & Share</h1>
-                            <p className="text-orange-100 text-lg">
+                            <h1 className="text-3xl sm:text-4xl font-bold mb-2">Swap & Share</h1>
+                            <p className="text-orange-100 text-base sm:text-lg">
                                 Turn your unused items into treasures. Connect with your community through sustainable trading.
                             </p>
                         </div>
                         <Button
                             onClick={() => setShowCreateModal(true)}
-                            className="bg-white text-yellow-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mt-4 md:mt-0"
+                            className="bg-white text-yellow-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto"
                         >
                             <Plus className="h-5 w-5 mr-2" />
                             List Your First Item

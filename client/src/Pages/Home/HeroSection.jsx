@@ -46,7 +46,7 @@ const HeroSection = () => {
 
   return (
     <section
-      className="relative min-h-[750px] flex items-center justify-center mt-[60px] text-white overflow-hidden bg-cover bg-center"
+      className="relative min-h-[620px] md:min-h-[750px] flex items-center justify-center mt-[60px] text-white overflow-hidden bg-cover bg-center"
       style={{
         backgroundImage: `url(https://png.pngtree.com/thumb_back/fw800/background/20241014/pngtree-digital-trading-and-investment-concept-abstract-business-handshake-and-stock-market-image_16387730.jpg)`
       }}
@@ -63,7 +63,7 @@ const HeroSection = () => {
       />
 
       {/* Content */}
-      <div className="z-20 max-w-6xl px-6 text-center">
+      <div className="z-20 max-w-6xl px-4 sm:px-6 text-center">
         <div className="inline-flex items-center mb-6 mt-5 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-sm font-medium">
           <Sparkles className="w-4 h-4 mr-2 text-yellow-400" />
           A Smarter Way to Swap
